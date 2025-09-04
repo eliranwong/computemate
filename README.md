@@ -102,6 +102,8 @@ graph TD
 pip install --upgrade xomateai
 ```
 
+Attention: The `xomateai` package is currently mirroring the `agentmakemcp` package. Once the development of XoMate AI reaches the production stage, the actual `xomateai` package will be uploaded.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
