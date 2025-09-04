@@ -1,7 +1,8 @@
-# xomate.ai
+# XoMate AI
+
 > Execute. Orchestrate. Automate.
 
-**xomate.ai is your autonomous execution engine—automating planning, orchestration, and execution of tasks using multiple tools to resolve user requests seamlessly.**
+**XoMate.AI is your autonomous execution engine—automating planning, orchestration, and execution of tasks using multiple tools to resolve user requests seamlessly.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
