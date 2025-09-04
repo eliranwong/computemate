@@ -46,31 +46,36 @@ xomate.ai is an automation-first AI agent that takes your goals, creates a struc
 
 ```mermaid
 graph TD
-    subgraph XoMate AI Engine
-        B[Analyze Request]
-        C[Generate Master Plan]
-        D[Select Tools]
-        E[Generate Instructions]
-        F[Execute & Monitor]
+    subgraph "XoMate AI Engine"
+        B["Analyze Request"]
+        C["Generate Master Plan"]
+        D["Select Tools"]
+        E["Generate Instructions"]
+        F["Execute & Monitor"]
     end
 
-    A[User Request] --> B;
-    B --> C;
-    C --> D;
-    D --> E;
-    E --> F;
+    A["User Request"] --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
 
-    subgraph External Systems
-        G[AgentMake AI Tools]
-        H[3rd Party MCP Servers]
+    subgraph "Internal Systems"
+        J["Built-in Tools"]
     end
 
-    F --> G;
-    F --> H;
+    subgraph "External Systems"
+        G["AgentMake AI Tools"]
+        H["3rd Party MCP Servers"]
+    end
 
-    I[Final Result]
-    F --> I;
-    I --> A;
+    F --> J
+    F --> G
+    F --> H
+
+    I["Final Result"]
+    F --> I
+    I --> A
 ```
 
 ## Development in Progress
