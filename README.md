@@ -23,7 +23,7 @@ xomate.ai is an automation-first AI agent that takes your goals, creates a struc
 
 ### Key Differentiators
 
-*   Built on the [agentmake.ai](https://github.com/eliranwong/agentmake) framework, proven through [LetMeDoIt.AI](https://github.com/eliranwong/letmedoit) and [ToolMate.AI](https://github.com/eliranwong/toolmate).
+*   Built on the [agentmake.ai](https://github.com/eliranwong/agentmake) framework, proven through [LetMeDoIt.AI](https://github.com/eliranwong/letmedoit), [ToolMate.AI](https://github.com/eliranwong/toolmate) and [TeamGen AI](https://github.com/eliranwong/teamgenai).
 *   Execution-focused, not just advisory.
 *   Flexible integration with existing tools and APIs.
 *   Scalable from individual users to enterprise workflows.
@@ -60,7 +60,6 @@ graph TD
     C --> D
     D --> E
     E --> F
-    F --> C
 
     subgraph "Internal Systems"
         J["Built-in Tools"]
@@ -96,6 +95,14 @@ graph TD
 *   [ ] Build a web UI.
 *   [ ] Test on Windows, macOS, Linux, and ChromeOS.
 *   [ ] Test on Android mobile devices.
+
+### Custom Features
+
+*   [ ] edit master plan
+*   [ ] iteration allowance
+*   [ ] change tools
+
+... more ...
 
 ## Install (upcoming ...)
 
