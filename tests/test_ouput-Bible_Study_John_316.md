@@ -2,9 +2,9 @@
 
 Run on terminal:
 
-> agentmakemcp agentmake_mcp/examples/bible_study.py
+> agentmakemcp agentmakemcp/examples/bible_study.py
 
-Check: https://github.com/eliranwong/agentmake_mcp/blob/main/examples/bible_study.py
+Check: https://github.com/eliranwong/agentmakemcp/blob/main/examples/bible_study.py
 
 # Run XoMate AI
 

@@ -81,19 +81,19 @@ graph TD
 
 ## First Test Output
 
-Unbelievable! In response to a simple request—namely, `In-depth study of John 3:16`—even in a very raw beta version, XoMate AI fully automates the planning of a 10-step process to achieve a comprehensive result, executes it, and completes it by orchestrating multiple tools, all without the need for human intervention.
+Unbelievable! In response to a simple request—namely, `In-depth study on Lamentations 3:22-24`—even in a very raw beta version, XoMate AI fully automates the planning of a 11-step process to achieve a comprehensive result, executes it, and completes it by orchestrating multiple tools, all without the need for human intervention.
 
-Amazing... Five and a half minutes achieved what is supposed to require multiple hours of work.
+Amazing... a few minutes achieved what is supposed to require multiple hours of work.
 
 Below is the full video of the test:
 
-[![Watch the video](https://img.youtube.com/vi/bGpvHzYg9y4/maxresdefault.jpg)](https://youtu.be/bGpvHzYg9y4)
+[![Watch the video](https://img.youtube.com/vi/2BPZVufnKJU/maxresdefault.jpg)](https://youtu.be/2BPZVufnKJU)
 
-YouTube link: https://youtu.be/bGpvHzYg9y4
+YouTube link: https://youtu.be/2BPZVufnKJU
 
-Full text output is filed at: https://github.com/eliranwong/xomateai/blob/main/tests/test_ouput-Bible_Study_John_316.md
+Full text output is filed at: https://github.com/eliranwong/xomateai/blob/main/tests/test3.md
 
-Remarks: This customised AgentMake AI MCP Server was used for this test - https://github.com/eliranwong/agentmake_mcp/blob/main/examples/bible_study.py
+Remarks: This customised AgentMake AI MCP Server was used for this test - https://github.com/eliranwong/agentmakemcp/blob/main/examples/bible_study.py
 
 ## Development in Progress
 

@@ -27,7 +27,7 @@ with open(os.path.join(package, "requirements.txt"), "r") as fileObj:
 # https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/
 setup(
     name=package,
-    version="0.0.9",
+    version="0.0.10",
     python_requires=">=3.8, <3.13",
     description=f"AgentMake AI MCP Servers - Easy setup of MCP servers running AgentMake AI agentic components.",
     long_description=long_description,

@@ -1,3 +1,5 @@
-agentmake>=1.0.59
-agentmakemcp
+agentmake>=1.0.63
+agentmakemcp>=0.0.8
 fastmcp
+rich
+alive-progress
