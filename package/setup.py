@@ -27,7 +27,7 @@ with open(os.path.join(package, "requirements.txt"), "r") as fileObj:
 # https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/
 setup(
     name=package,
-    version="0.0.10",
+    version="0.0.11",
     python_requires=">=3.8, <3.13",
     description=f"AgentMake AI MCP Servers - Easy setup of MCP servers running AgentMake AI agentic components.",
     long_description=long_description,
@@ -35,9 +35,13 @@ setup(
     author_email="support@toolmate.ai",
     packages=[
         package,
+        f"{package}.core",
+        f"{package}.ui",
     ],
     package_data={
         package: ["*.*"],
+        f"{package}.core": ["*.*"],
+        f"{package}.ui": ["*.*"],
     },
     license="GNU General Public License (GPL)",
     install_requires=install_requires,
