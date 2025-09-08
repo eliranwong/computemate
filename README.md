@@ -58,6 +58,7 @@ graph TD
     C --> D
     D --> E
     E --> F
+    F --> C
 
     subgraph "Internal Systems"
         J["Built-in Tools"]
