@@ -11,8 +11,6 @@ For professionals, teams, and innovators who need more than just chat-based AI, 
 
 ## Core Messaging
 
-### Elevator Pitch
-
 xomate.ai is an automation-first AI agent that takes your goals, creates a structured plan, and executes it by orchestrating multiple tools. It goes beyond conversation—delivering real results.
 
 ### Value Propositions
