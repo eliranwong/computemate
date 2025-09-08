@@ -1,6 +1,6 @@
 # XoMate AI
 
-> Execute. Orchestrate. Automate.
+> eXecute. Orchestrate. Automate.
 
 **XoMate.AI is your autonomous execution engine—automating planning, orchestration, and execution of tasks using multiple tools to resolve user requests seamlessly.**
 
