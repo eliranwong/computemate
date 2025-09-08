@@ -82,9 +82,9 @@ Install (upcoming ...)
 
 .. code-block:: bash
 
-    pip install --upgrade xomateai
+    pip install --upgrade xomate
 
-Attention: The ``xomateai`` package is currently mirroring the ``agentmakemcp`` package. Once the development of XoMate AI reaches the production stage, the actual ``xomateai`` package will be uploaded.
+Attention: The ``xomate`` package is currently mirroring the ``agentmakemcp`` package. Once the development of XoMate AI reaches the production stage, the actual ``xomate`` package will be uploaded.
 
 License
 -------

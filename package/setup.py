@@ -27,7 +27,7 @@ with open(os.path.join(package, "requirements.txt"), "r") as fileObj:
 # https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/
 setup(
     name=package,
-    version="0.0.11",
+    version="0.0.13",
     python_requires=">=3.8, <3.13",
     description=f"AgentMake AI MCP Servers - Easy setup of MCP servers running AgentMake AI agentic components.",
     long_description=long_description,
@@ -56,9 +56,9 @@ setup(
     keywords="mcp agent toolmate ai anthropic azure chatgpt cohere deepseek genai github googleai groq llamacpp mistral ollama openai vertexai xai",
     url="https://toolmate.ai",
     project_urls={
-        "Source": "https://github.com/eliranwong/xomateai",
-        "Tracker": "https://github.com/eliranwong/xomateai/issues",
-        "Documentation": "https://github.com/eliranwong/xomateai/wiki",
+        "Source": "https://github.com/eliranwong/xomate",
+        "Tracker": "https://github.com/eliranwong/xomate/issues",
+        "Documentation": "https://github.com/eliranwong/xomate/wiki",
         "Funding": "https://www.paypal.me/toolmate",
     },
     classifiers=[

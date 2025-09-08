@@ -1,11 +1,12 @@
 from xomate.core.systems import *
 from xomate.ui.prompts import getInput
 from xomate.ui.info import get_banner
+from xomate import config
 from pathlib import Path
 import asyncio, re, os
 from alive_progress import alive_bar
 from fastmcp import Client
-from agentmake import agentmake, writeTextFile, getCurrentDateTime, AGENTMAKE_USER_DIR, USER_OS, DEVELOPER_MODE
+from agentmake import agentmake, getDictionaryOutput, edit_configurations, writeTextFile, getCurrentDateTime, AGENTMAKE_USER_DIR, USER_OS, DEVELOPER_MODE
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -15,7 +16,7 @@ if not USER_OS == "Windows":
 
 # MCP server client example
 # testing in progress; not in production yet
-client = Client("http://127.0.0.1:8083/mcp/") # !agentmakemcp agentmakemcp/examples/bible_study.py
+client = Client("http://127.0.0.1:8084/mcp/") # !agentmakemcp agentmakemcp/examples/bible_study.py
 
 # TODO: allow overriding default AgentMake config
 AGENTMAKE_CONFIG = {
@@ -30,6 +31,7 @@ AGENTMAKE_CONFIG = {
     "print_on_terminal": False,
     "word_wrap": False,
 }
+# TODO: place in config.py
 MAX_STEPS = 50
 
 async def main():
@@ -48,6 +50,18 @@ async def main():
         tools_raw = await client.list_tools()
         #print(tools_raw)
         tools = {t.name: t.description for t in tools_raw}
+        tools_schema = {}
+        for t in tools_raw:
+            schema = {
+                "name": t.name,
+                "description": t.description,
+                "parameters": {
+                    "type": "object",
+                    "properties": t.inputSchema["properties"],
+                    "required": t.inputSchema["required"],
+                },
+            }
+            tools_schema[t.name] = schema
 
         available_tools = list(tools.keys())
         if not "get_direct_text_response" in available_tools:
@@ -69,7 +83,30 @@ Get a static text-based response directly from a text-based AI model without usi
         prompt_pattern = "|".join(prompt_list)
         prompt_pattern = f"""^({prompt_pattern}) """
 
+        prompts_schema = {}
+        for p in prompts_raw:
+            arg_properties = {}
+            arg_required = []
+            for a in p.arguments:
+                arg_properties[a.name] = {
+                    "type": "string",
+                    "description": str(a.description) if a.description else "no description available",
+                }
+                if a.required:
+                    arg_required.append(a.name)
+            schema = {
+                "name": p.name,
+                "description": p.description,
+                "parameters": {
+                    "type": "object",
+                    "properties": arg_properties,
+                    "required": arg_required,
+                },
+            }
+            prompts_schema[p.name] = schema
+
         user_request = ""
+        master_plan = ""
         messages = []
 
         while not user_request == ".quit":
@@ -110,20 +147,70 @@ Get a static text-based response directly from a text-based AI model without usi
                 # Await the custom async progress bar that awaits the task.
                 await async_alive_bar(task)
 
+            # backup
+            def backup():
+                nonlocal console, messages, master_plan
+                timestamp = getCurrentDateTime()
+                storagePath = os.path.join(AGENTMAKE_USER_DIR, "xomate", timestamp)
+                Path(storagePath).mkdir(parents=True, exist_ok=True)
+                # Save full conversation
+                conversation_file = os.path.join(storagePath, "conversation.py")
+                writeTextFile(conversation_file, str(messages))
+                # Save master plan
+                writeTextFile(os.path.join(storagePath, "master_plan.md"), master_plan)
+                # Save html
+                html_file = os.path.join(storagePath, "conversation.html")
+                console.save_html(html_file, inline_styles=True, theme=MONOKAI)
+                # Save markdown
+                console.save_text(os.path.join(storagePath, "conversation.md"))
+                # Inform users of the backup location
+                print(f"Conversation backup saved to {storagePath}")
+                print(f"Report saved to {html_file}\n")
+            def write_config():
+                # TODO: support more configs
+                config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.py")
+                writeTextFile(config_file, f"agent_mode={config.agent_mode}")
+
             if messages:
                 console.rule()
 
             # Original user request
             # note: `python3 -m rich.emoji` for checking emoji
             console.print("Enter your request :smiley: :" if not messages else "Enter a follow-up request :flexed_biceps: :")
-            input_suggestions = [".new", ".quit"]+prompt_list
+            action_list = {
+                ".new": "new conversation",
+                ".quit": "quit",
+                ".backend": "change backend",
+                ".chat": "enable chat mode",
+                ".agent": "enable agent mode",
+            }
+            input_suggestions = list(action_list.keys())+prompt_list
             user_request = await getInput("> ", input_suggestions)
             while not user_request.strip():
                 user_request = await getInput("> ", input_suggestions)
-            # TODO: auto-prompt engineering based on the user request
 
-            if user_request in (".new", ".quit"):
-                # TODO: backup messages
+            # TODO: ui - radio list menu
+            if user_request in action_list:
+                if user_request == ".backend":
+                    edit_configurations()
+                    console.rule()
+                    console.print("Restart to make the changes in the backend effective!", justify="center")
+                    console.rule()
+                elif user_request == ".chat":
+                    config.agent_mode = False
+                    write_config()
+                    console.rule()
+                    console.print("Chat Mode Enabled", justify="center")
+                    console.rule()
+                elif user_request == ".agent":
+                    config.agent_mode = True
+                    write_config()
+                    console.rule()
+                    console.print("Agent Mode Enabled", justify="center")
+                    console.rule()
+                elif user_request in (".new", ".quit"):
+                    backup() # backup
+                # reset
                 if user_request == ".new":
                     user_request = ""
                     messages = []
@@ -131,13 +218,29 @@ Get a static text-based response directly from a text-based AI model without usi
                     console.print(get_banner())
                 continue
 
-            print(prompt_pattern, user_request)
+            # auto prompt engineering
+            user_request = agentmake(user_request, tool="improve_prompt", **AGENTMAKE_CONFIG)[-1].get("content", "").strip()[20:-4]
+
+            # Chat mode
+            if not config.agent_mode:
+                async def run_chat_mode():
+                    nonlocal messages, user_request
+                    messages = agentmake(messages if messages else user_request, system="auto", **AGENTMAKE_CONFIG)
+                await thinking(run_chat_mode)
+                console.print(Markdown(f"# User Request\n\n{messages[-2]['content']}\n\n# AI Response\n\n{messages[-1]['content']}"))
+                continue
+
             if re.search(prompt_pattern, user_request):
-                print(111)
                 prompt_name = re.search(prompt_pattern, user_request).group(1)
                 user_request = user_request[len(prompt_name):]
                 # Call the MCP prompt
-                result = await client.get_prompt(prompt_name[1:], {"request": user_request})
+                prompt_schema = prompts_schema[prompt_name[1:]]
+                prompt_properties = prompt_schema["parameters"]["properties"]
+                if len(prompt_properties) == 1 and "request" in prompt_properties: # AgentMake MCP Servers or alike
+                    result = await client.get_prompt(prompt_name[1:], {"request": user_request})
+                else:
+                    structured_output = getDictionaryOutput(messages=messages, schema=prompt_schema)
+                    result = await client.get_prompt(prompt_name[1:], structured_output)
                 #print(result, "\n\n")
                 master_plan = result.messages[0].content.text
                 # display info
@@ -239,10 +342,16 @@ Available tools are: {available_tools}.
                         messages = agentmake(messages, system="auto", **AGENTMAKE_CONFIG)
                     else:
                         try:
-                            tool_result = await client.call_tool(next_tool, {"request": next_step})
+                            tool_schema = tools_schema[next_tool]
+                            tool_properties = tool_schema["parameters"]["properties"]
+                            if len(tool_properties) == 1 and "request" in tool_properties: # AgentMake MCP Servers or alike
+                                tool_result = await client.call_tool(next_tool, {"request": next_step})
+                            else:
+                                structured_output = getDictionaryOutput(messages=messages, schema=tool_schema)
+                                tool_result = await client.call_tool(next_tool, structured_output)
                             tool_result = tool_result.content[0].text
                             messages[-1]["content"] += f"\n\n[Using tool `{next_tool}`]"
-                            messages.append({"role": "assistant", "content": tool_result})
+                            messages.append({"role": "assistant", "content": tool_result if tool_result.strip() else "Done!"})
                         except Exception as e:
                             if DEVELOPER_MODE:
                                 console.print(f"Error: {e}\nFallback to direct response...\n\n")
@@ -268,21 +377,6 @@ Available tools are: {available_tools}.
                 console.print(Markdown(next_suggestion), "\n")
 
             # Backup
-            timestamp = getCurrentDateTime()
-            storagePath = os.path.join(AGENTMAKE_USER_DIR, "xomate", timestamp)
-            Path(storagePath).mkdir(parents=True, exist_ok=True)
-            # Save full conversation
-            conversation_file = os.path.join(storagePath, "conversation.py")
-            writeTextFile(conversation_file, str(messages))
-            # Save master plan
-            writeTextFile(os.path.join(storagePath, "master_plan.md"), master_plan)
-            # Save html
-            html_file = os.path.join(storagePath, "conversation.html")
-            console.save_html(html_file, inline_styles=True, theme=MONOKAI)
-            # Save text
-            console.save_text(os.path.join(storagePath, "conversation.md"))
-            # Inform users of the backup location
-            print(f"Conversation backup saved to {storagePath}")
-            print(f"HTML file saved to {html_file}\n")
+            backup()
 
 asyncio.run(main())

@@ -89,7 +89,7 @@ async def getInput(prompt:str="Instruction: ", input_suggestions:list=None):
     completer = FuzzyCompleter(WordCompleter(input_suggestions, ignore_case=True)) if input_suggestions else None
     instruction = await session.prompt_async(
         prompt,
-        bottom_toolbar="[ENTER] submit [TAB] new line [Ctrl+N] new chat [Ctrl+Q] quit",
+        bottom_toolbar="[ENTER] submit [TAB] linebreak [Ctrl+N] new [Ctrl+Q] quit",
         completer=completer,
         key_bindings=bindings,
     )

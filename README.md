@@ -91,7 +91,7 @@ Below is the full video of the test:
 
 YouTube link: https://youtu.be/2BPZVufnKJU
 
-Full text output is filed at: https://github.com/eliranwong/xomateai/blob/main/tests/test3.md
+Full text output is filed at: https://github.com/eliranwong/xomate/blob/main/tests/test3.md
 
 Remarks: This customised AgentMake AI MCP Server was used for this test - https://github.com/eliranwong/agentmakemcp/blob/main/examples/bible_study.py
 
@@ -119,16 +119,29 @@ Remarks: This customised AgentMake AI MCP Server was used for this test - https:
 *   [ ] edit master plan
 *   [ ] iteration allowance
 *   [ ] change tools
+*   [ ] three modes: chat, light, full
 
 ... more ...
 
 ## Install (upcoming ...)
 
 ```bash
-pip install --upgrade xomateai
+pip install --upgrade xomate
 ```
 
-Attention: The `xomateai` package is currently mirroring the `agentmakemcp` package. Once the development of XoMate AI reaches the production stage, the actual `xomateai` package will be uploaded.
+Attention: The `xomate` package is currently mirroring the `agentmakemcp` package. Once the development of XoMate AI reaches the production stage, the actual `xomate` package will be uploaded.
+
+# Action Menu
+
+* `[blank]` lanuch action menu
+* `.new` new conversation (ctrl+n)
+* `.quit` quit (ctrl+q)
+* `.chat` enable chat mode
+* `.agent` enable agent mode
+* `.backend` configure backend
+* `.mcp` configure mcp
+
+Tips: Enter `.` to get input suggestions.
 
 ## License
 
