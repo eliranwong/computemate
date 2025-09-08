@@ -16,18 +16,9 @@ if not USER_OS == "Windows":
 
 # MCP server client example
 # testing in progress; not in production yet
-client = Client("http://127.0.0.1:8084/mcp/") # !agentmakemcp agentmakemcp/examples/bible_study.py
+client = Client("http://127.0.0.1:8080/mcp/") ## need to configure
 
-# TODO: allow overriding default AgentMake config
 AGENTMAKE_CONFIG = {
-    "backend": None,
-    "model": None,
-    "model_keep_alive": None,
-    "temperature": None,
-    "max_tokens": None,
-    "context_window": None,
-    "batch_size": None,
-    "stream": None,
     "print_on_terminal": False,
     "word_wrap": False,
 }
