@@ -78,22 +78,6 @@ graph TD
     I --> A
 ```
 
-## First Test Output
-
-Unbelievable! In response to a simple request—namely, `In-depth study on Lamentations 3:22-24`—even in a very raw beta version, ComputeMate AI fully automates the planning of a 11-step process to achieve a comprehensive result, executes it, and completes it by orchestrating multiple tools, all without the need for human intervention.
-
-Amazing... a few minutes achieved what is supposed to require multiple hours of work.
-
-Below is the full video of the test:
-
-[![Watch the video](https://img.youtube.com/vi/2BPZVufnKJU/maxresdefault.jpg)](https://youtu.be/2BPZVufnKJU)
-
-YouTube link: https://youtu.be/2BPZVufnKJU
-
-Full text output is filed at: https://github.com/eliranwong/computemate/blob/main/tests/test3.md
-
-Remarks: This customised AgentMake AI MCP Server was used for this test - https://github.com/eliranwong/agentmakemcp/blob/main/examples/bible_study.py
-
 ## Development in Progress
 
 1.  Agentic workflow developed and tested.
