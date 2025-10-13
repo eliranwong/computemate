@@ -78,34 +78,6 @@ graph TD
     I --> A
 ```
 
-## Development in Progress
-
-1.  Agentic workflow developed and tested.
-2.  Core code built for the agentic workflow.
-3.  Tested with AgentMake AI MCP servers.
-
-### Pending
-
-*   [ ] Build an action plan agent to handle random requests.
-*   [ ] Refine code and improve effectiveness.
-*   [ ] Test with third-party systems.
-*   [ ] Select frequently used AgentMake AI tools to include in the main library as built-in tools.
-*   [ ] Build CLI/TUI interfaces.
-*   [ ] Build a web UI.
-*   [ ] Test on Windows, macOS, Linux, and ChromeOS.
-*   [ ] Test on Android mobile devices.
-
-### Custom Features
-
-*   [ ] options to unload some or all built-in tools
-*   [ ] custom ComputeMate AI system prompts
-*   [ ] edit master plan
-*   [ ] iteration allowance
-*   [ ] change tools
-*   [ ] three modes: chat, light, full
-
-... more ...
-
 ## Install
 
 ```bash
@@ -120,9 +92,191 @@ To support Google Vertex AI, install with:
 pip install --upgrade "computemate[genai]"
 ```
 
-# Configure MCP Servers
+### For Developer
+
+> pip install -e .
+
+## 🗣️ AI Modes
+
+You can select between three AI modes to suit your preferences:
+
+*   **Chat mode** – Provides direct text responses without using tools, ideal for simple queries.
+*   **Agent mode** – A fully autonomous agent designed to plan, orchestrate tools, and take multiple actions to address user requests.
+*   **Partner mode** – A semi-automated mode that involves you in the process with review and edit prompts, giving you more control over the AI's actions.
+
+`Partner mode` is set as the default on fresh installation.
+
+To switch between modes, use the `.mode` command in the ComputeMate AI prompt. This will open a selection dialog where you can choose your preferred mode.
+
+<img width="714" height="271" alt="Image" src="https://github.com/user-attachments/assets/f836a0ad-ae77-4b07-bb74-f9af5bce26c6" />
+
+## ⚙️ Configure AI Backend
+
+After ComputeMate AI is launched, enter:
+
+> .backend
+
+A text editor is opened for you to edit the AgentMake AI settings. Change the `DEFAULT_AI_BACKEND` to your own choice of AI backend and enter API keys where appropriate.
+
+You may override the default AI backend temporarily by using the CLI option `-b` or `--backend`. For example,
+
+> computemate -b groq
+
+## Configure MCP Servers
 
 Enter `.mcp` in ComputeMate AI prompt.
+
+## Configure Available Tools
+
+Enter `.tools` in ComputeMate AI prompt.
+
+Select / deselect to enable / disable tools.
+
+## 🏃 Action Menu
+
+| Command              | Description                        |
+|----------------------|------------------------------------|
+| `.new`               | New conversation                   |
+| `.exit`              | Quit ComputeMate AI                  |
+| `.backend`           | Change backend                     |
+| `.mode`              | Change AI mode                     |
+| `.tools`             | List available tools               |
+| `.plans`             | List available plans               |
+| `.resources`         | List available resources           |
+| `.editprompt`        | Edit current prompt                |
+| `.backup`            | Backup conversation                |
+| `.reload`            | Reload current conversation        |
+| `.edit`              | Edit current conversation          |
+| `.trim`              | Trim current conversation          |
+| `.import`            | Import conversation                |
+| `.export`            | Export conversation                |
+| `.find`              | search conversation                |
+| `.open`              | Open file or directory             |
+| `.ideas`             | Generate ideas                     |
+| `.autosuggestions`   | Toggle auto input suggestions      |
+| `.promptengineer`    | Toggle auto prompt engineering     |
+| `.lite`              | Toggle lite context                |
+| `.steps`             | Set max number of steps            |
+| `.matches`           | Set max number of semantic matches |
+| `.download`          | Download data files                |
+| `.help`              | Show help page                     |
+
+### Remarks:
+
+* Use `.lite` to enable or disable lite context. When lite context is enabled, ComputeMate runs faster, with a slight trade‑off in tool response quality.
+* To use `.import`, you need to specify a python file that contains a saved conversation.  Conversation is saved into a file each time when a backup is executed. Check the message `Conversation backup saved to ...` or locate the backups in `~/agentmake/xomate`. Instead of loading a mere conversation, you can load both a conversation and its master plan. To do so, specify a backup directory path that contains both `conversation.py` and `master_plan.md`.
+* To use `.open`, you need to specify a file or a directory that is to be opened.
+* `.edit` command allows you to edit the current conversation with our built-in text editor.  You may customize to use your favorite text editor. Enter `.backend` and change the value of `DEFAULT_TEXT_EDITOR` with a command that calls your favorite text editor.
+* Use `.autosuggestions` to toggle auto input suggestions. If enabled, you can use `TAB` key to open input suggestions menu.
+* Use `.reload` to reload the last saved conversation, if any.  It is useful for continuing an unfinished agentic flow after a conversation was broken for any reasons.
+* Command `.matches` works for local MCP connection only.  It doesn't apply to remote MCP connection, as the changes in local settings does not affect the settings in remote servers.
+
+## ⌨️ Keyboard Shortcuts
+
+The following key bindings are supported in ComputeMate AI prompt field:
+
+- `Ctrl+Y`: help info
+- `Ctrl+S` or `Esc+ENTER` or `Alt+ENTER`: submit input
+- `Ctrl+N`: new conversation
+- `Esc+I`: import conversation
+- `Esc+O`: edit conversation
+- `Ctrl+O`: edit input in text editor
+- `Ctrl+Q`: exit input
+- `Ctrl+R`: reset input
+- `Ctrl+Z`: undo input changes
+- `Ctrl+W`: save prompt / plan
+- `Esc+W`: delete prompt / plan
+- `Ctrl+L`: open prompt / plan
+- `Esc+L`: search prompt / plan
+- `Ctrl+F`: search conversation
+- `Ctrl+J`: change AI mode
+- `Ctrl+G`: toggle auto input suggestions
+- `Esc+G`: generate ideas for prompts to try
+- `Ctrl+P`: toggle auto prompt engineering
+- `Esc+P`: improve prompt content
+- `Ctrl+D`: delete
+- `Ctrl+H`: backspace
+- `Ctrl+W`: delete previous word
+- `Ctrl+U`: kill text until start of line
+- `Ctrl+K`: kill text until end of line
+- `Ctrl+A`: go to beginning of line
+- `Ctrl+E`: go to end of line
+- `Ctrl+LEFT`: go to one word left
+- `Ctrl+RIGHT`: go to one word right
+- `Ctrl+UP`: scroll up
+- `Ctrl+DOWN`: scroll down
+- `Shift+TAB`: insert four spaces
+- `TAB` or `Ctrl+I`: open input suggestion menu
+- `Esc`: close input suggestion menu
+
+Common shortcuts on Terminal Apps:
+
+- `Ctrl+Shift+C`: Copy
+- `Ctrl+Shift+V`: Paste
+
+## 🛠️ Customization
+
+ComputeMate AI is highly customizable. Advanced users can modify existing tools, create new ones, and even change the behavior of the AI agent by customizing system prompts.
+
+Custom files are placed in the `computemate` sub-directory within the AgentMake user directory (typically `~/.agentmake/computemate` on Linux/macOS or `%USERPROFILE%\.agentmake\computemate` on Windows).
+
+### Frequently Used Prompts and Plans
+
+You can save, search, open or delete frequently used prompts and plans.
+
+For examples:
+
+* Enter a prompt and use `Ctrl+W` to save a prompt.
+* Prefix a prompt with `@@` and use `Ctrl+W` to save a prompt.
+* Use `Esc+W` to delete a saved prompt / plan.
+* Use `Ctrl+L` to open a prompt / plan.
+* Use `Esc+L` to search for prompts / plans.
+
+### Override system prompts
+
+The agent's core logic is guided by system prompts, which are markdown files. You can override them by placing your own versions in `~/.agentmake/systems/computemate/`.
+
+The customizable system prompt files are: `supervisor.md`, `tool_instruction.md`, and `tool_selection.md`. You can copy them from the `computemate/systems` directory in the package installation folder to your user directory and modify them as needed.
+
+### Add or Modify Tools & Plans
+
+You can add your own tools and built-in plans (prompts) by creating a custom `computemate_mcp.py` file.
+
+1.  First, locate the built-in `computemate_mcp.py` file inside the `computemate` package installation directory.
+2.  Copy this file to your user customization directory at `~/.agentmake/computemate/computemate_mcp.py`.
+3.  Now you can edit this file to add or modify tools and prompts using the `fastmcp` syntax. ComputeMate AI will automatically load your custom file instead of the built-in one.
+
+## ✒️ Built-in Text Editor
+
+<img width="866" height="629" alt="Image" src="https://github.com/user-attachments/assets/d62658d0-10df-4e56-8de3-58787600327f" />
+
+You can edit current prompt with our built-in text editor, by either enter `.editprompt` or pressing `Ctrl+O` in the ComputeMate AI prompt field.
+
+You can also launch the built-in editor on its own by running `etextedit`.
+
+You can use plugins that built with ComputeMate AI and AgentMake AI in our built-in text editor `etextedit`.
+
+Plugins `Extract Bible References` and `Insert Bible Text` are installed with ComputeMate AI.
+
+You may also add you own `etextedit` plugins and place them into `~/etextedit/plugins`.
+
+Read more about `etextedit` at https://github.com/eliranwong/etextedit 
+
+## Export to DOCX or PDF [Optional]
+
+`etextedit` offers options for exporting content into DOCX and PDF files.
+
+- `pandoc` is required to export content to DOCX format. To install, for example, on Debian/Ubuntu:
+
+> sudo apt install pandoc
+
+- `pdflatex` is required to export content to PDF format. To install, for example, on Debian/Ubuntu:
+
+> sudo apt install texlive-full
+
+## Third-Party Text Editor [Optional]
+
+You can use a third-party text editor of your own choice. Enter `.backend` in the ComputeMate AI prompt and specify the value of `DEFAULT_TEXT_EDITOR` with a command that calls your favorite text editor, e.g. `micro -softwrap true -wordwrap true`. To use the built-in text editor `etextedit` for making changes, you simply need one step, i.e. either save `Ctrl+S` or exit `Ctrl+Q`, to return to the ComputeMate AI prompt. With third-party text editor, however, you need to save the changes first before exiting.
 
 ## License
 

@@ -168,10 +168,11 @@ Get a static text-based response directly from a text-based AI model without usi
     
     return tools, tools_schema, master_available_tools, available_tools, tool_descriptions, prompts, prompts_schema, resources, templates
 
-def display_info(console, info):
+def display_info(console, info, title=None):
     """ Info panel with background """
     info_panel = Panel(
         Text(info, style="bold white on grey11", justify="center") if isinstance(info, str) else info,
+        title=title,
         border_style="bright_blue",
         box=box.ROUNDED,
         style="on grey11" if isinstance(info, str) else "",
@@ -210,6 +211,19 @@ def backup_conversation(messages, master_plan, console=None, storage_path=None):
         if console:
             info = f"Conversation saved to: {storage_path}\nReport saved to: {html_file}"
             display_info(console, info)
+
+def run_system_command(cmd: str):
+    cmd += " && cd" if USER_OS == "Windows" else " && pwd"
+    text_output = subprocess.run(
+        cmd,
+        shell=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    lines = text_output.split("\n")
+    if len(lines) == 1:
+        return "Done!", lines[0]
+    return "\n".join(lines[:-1]), lines[-1]
 
 async def main_async():
 
@@ -337,6 +351,17 @@ async def main_async():
             if user_request == ".":
                 select = await DIALOGS.getValidOptions(options=config.action_list.keys(), descriptions=[i.capitalize() for i in config.action_list.values()], title="Action Menu", text="Select an action:")
                 user_request = select if select else ""
+            elif user_request.startswith("!"):
+                pre_cwd = os.getcwd()
+                cmd = user_request[1:].strip()
+                if not cmd:
+                    cmd = "cd" if USER_OS == "Windows" else "pwd"
+                cmd_output, cwd = run_system_command(cmd)
+                display_info(console, cmd_output)
+                if (not pre_cwd == cwd) and os.path.isdir(cwd):
+                    os.chdir(cwd)
+                    display_info(console, cwd, title="Current Directory")
+                continue
             if not user_request:
                 continue
             if user_request == ".ideas":

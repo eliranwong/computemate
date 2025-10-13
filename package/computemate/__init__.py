@@ -85,7 +85,7 @@ config.action_list = {
     # resource information
     ".tools": "list available tools",
     ".plans": "list available plans",
-    #".resources": "list available resources",
+    ".resources": "list available resources",
     # configurations
     ".backend": "configure backend",
     ".mcp": "configure MCP servers",

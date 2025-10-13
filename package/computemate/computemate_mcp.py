@@ -59,7 +59,7 @@ def content(directory:str) -> str:
 
 @mcp.tool
 def execute_task(request:str) -> str:
-    """execute computing tasks according to user requests"""
+    """execute computing tasks or retrieve computer information"""
     global agentmake, getResponse
     messages = agentmake(request, **{'tool': 'execute_task'}, **AGENTMAKE_CONFIG)
     return getResponse(messages)
