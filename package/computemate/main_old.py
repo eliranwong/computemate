@@ -1,7 +1,7 @@
-from xomate.core.systems import *
-from xomate.ui.prompts import getInput
-from xomate.ui.info import get_banner
-from xomate import config
+from computemate.core.systems import *
+from computemate.ui.prompts import getInput
+from computemate.ui.info import get_banner
+from computemate import config
 from pathlib import Path
 import asyncio, re, os
 from alive_progress import alive_bar
@@ -142,7 +142,7 @@ Get a static text-based response directly from a text-based AI model without usi
             def backup():
                 nonlocal console, messages, master_plan
                 timestamp = getCurrentDateTime()
-                storagePath = os.path.join(AGENTMAKE_USER_DIR, "xomate", timestamp)
+                storagePath = os.path.join(AGENTMAKE_USER_DIR, "computemate", timestamp)
                 Path(storagePath).mkdir(parents=True, exist_ok=True)
                 # Save full conversation
                 conversation_file = os.path.join(storagePath, "conversation.py")
@@ -278,7 +278,7 @@ Available tools are: {available_tools}.
 
             if not messages:
                 messages = [
-                    {"role": "system", "content": "You are XoMate, an autonomous AI agent."},
+                    {"role": "system", "content": "You are ComputeMate, an autonomous AI agent."},
                     {"role": "user", "content": user_request},
                 ]
             else:
@@ -315,7 +315,7 @@ Available tools are: {available_tools}.
                     nonlocal next_step, next_tool, next_suggestion, tools
                     console.print(Markdown(f"## Next Instruction [{step}]"), "\n")
                     if next_tool == "get_direct_text_response":
-                        next_step = agentmake(next_suggestion, system="xomate/direct_instruction", **AGENTMAKE_CONFIG)[-1].get("content", "").strip()
+                        next_step = agentmake(next_suggestion, system="computemate/direct_instruction", **AGENTMAKE_CONFIG)[-1].get("content", "").strip()
                     else:
                         next_tool_description = tools.get(next_tool, "No description available.")
                         system_tool_instruction = get_system_tool_instruction(next_tool, next_tool_description)

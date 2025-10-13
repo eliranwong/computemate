@@ -1,23 +1,23 @@
-# XoMate AI
+# ComputeMate AI
 
 > eXecute. Orchestrate. Automate.
 
-**XoMate.AI is your autonomous execution engine—automating planning, orchestration, and execution of tasks using multiple tools to resolve user requests seamlessly.**
+**ComputeMate.AI is your autonomous execution engine—automating planning, orchestration, and execution of tasks using multiple tools to resolve user requests seamlessly.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 
-For professionals, teams, and innovators who need more than just chat-based AI, xomate.ai is an intelligent automation agent that plans, coordinates, and executes tasks across multiple tools. Unlike basic AI chatbots, xomate.ai doesn’t just answer—it gets things done.
+For professionals, teams, and innovators who need more than just chat-based AI, computemate.ai is an intelligent automation agent that plans, coordinates, and executes tasks across multiple tools. Unlike basic AI chatbots, computemate.ai doesn’t just answer—it gets things done.
 
 ## Core Messaging
 
-xomate.ai is an automation-first AI agent that takes your goals, creates a structured plan, and executes it by orchestrating multiple tools. It goes beyond conversation—delivering real results.
+computemate.ai is an automation-first AI agent that takes your goals, creates a structured plan, and executes it by orchestrating multiple tools. It goes beyond conversation—delivering real results.
 
 ### Value Propositions
 
 *   **Execute**: Automatically carry out tasks from start to finish.
 *   **Orchestrate**: Seamlessly coordinate multiple tools and APIs.
-*   **Automate**: Save time and effort by letting xomate.ai handle complex workflows.
+*   **Automate**: Save time and effort by letting computemate.ai handle complex workflows.
 
 ### Key Differentiators
 
@@ -28,24 +28,24 @@ xomate.ai is an automation-first AI agent that takes your goals, creates a struc
 *   **Versatile** – supports 16 AI backends and numerous models, leveraging the advantages of AgentMake AI.
 *   **Extensible** – capable of extending functionalities by interacting with Additional AgentMake AI tools or third-party MCP (Modal Context Protocol) servers.
 
-## XoMate AI Agentic Workflow
+## ComputeMate AI Agentic Workflow
 
-1.  **XoMate AI** receives a request from a user.
-2.  **XoMate AI** analyzes the request and determines that it requires multiple steps to complete.
-3.  **XoMate AI** generates a `Master Prompt` that outlines the steps needed to complete the request.
-4.  **XoMate AI** sends the `Master Prompt` to a supervisor agent, who reviews the prompt and provides suggestions for improvement.
-5.  **XoMate AI** sends the suggestions to a tool selection agent, who selects the most appropriate tools for each step of the `Master Prompt`.
-6.  **XoMate AI** sends the selected tools and the `Master Prompt` to an instruction generation agent, who converts the suggestions into clear and concise instructions for an AI assistant to follow.
-7.  **XoMate AI** sends the instructions to an AI assistant, who executes the instructions using the selected tools. When the selected tool is not an internal tool, built in with XoMate AI, XoMate AI calls the external tool via interacting with the MCP (Modal Context Protocol) servers, configured by users.
-8.  **XoMate AI** monitors the progress of the AI assistant and provides additional suggestions or instructions as needed.
-9.  Once all steps are completed, **XoMate AI** provides a concise summary of the results to the user.
+1.  **ComputeMate AI** receives a request from a user.
+2.  **ComputeMate AI** analyzes the request and determines that it requires multiple steps to complete.
+3.  **ComputeMate AI** generates a `Master Prompt` that outlines the steps needed to complete the request.
+4.  **ComputeMate AI** sends the `Master Prompt` to a supervisor agent, who reviews the prompt and provides suggestions for improvement.
+5.  **ComputeMate AI** sends the suggestions to a tool selection agent, who selects the most appropriate tools for each step of the `Master Prompt`.
+6.  **ComputeMate AI** sends the selected tools and the `Master Prompt` to an instruction generation agent, who converts the suggestions into clear and concise instructions for an AI assistant to follow.
+7.  **ComputeMate AI** sends the instructions to an AI assistant, who executes the instructions using the selected tools. When the selected tool is not an internal tool, built in with ComputeMate AI, ComputeMate AI calls the external tool via interacting with the MCP (Modal Context Protocol) servers, configured by users.
+8.  **ComputeMate AI** monitors the progress of the AI assistant and provides additional suggestions or instructions as needed.
+9.  Once all steps are completed, **ComputeMate AI** provides a concise summary of the results to the user.
 10. The user receives the final response, which fully resolves their original request.
 
 ### Workflow Diagram
 
 ```mermaid
 graph TD
-    subgraph "XoMate AI Engine"
+    subgraph "ComputeMate AI Engine"
         B["Analyze Request"]
         C["Generate Master Plan"]
         D["Select Tools"]
@@ -80,7 +80,7 @@ graph TD
 
 ## First Test Output
 
-Unbelievable! In response to a simple request—namely, `In-depth study on Lamentations 3:22-24`—even in a very raw beta version, XoMate AI fully automates the planning of a 11-step process to achieve a comprehensive result, executes it, and completes it by orchestrating multiple tools, all without the need for human intervention.
+Unbelievable! In response to a simple request—namely, `In-depth study on Lamentations 3:22-24`—even in a very raw beta version, ComputeMate AI fully automates the planning of a 11-step process to achieve a comprehensive result, executes it, and completes it by orchestrating multiple tools, all without the need for human intervention.
 
 Amazing... a few minutes achieved what is supposed to require multiple hours of work.
 
@@ -90,7 +90,7 @@ Below is the full video of the test:
 
 YouTube link: https://youtu.be/2BPZVufnKJU
 
-Full text output is filed at: https://github.com/eliranwong/xomate/blob/main/tests/test3.md
+Full text output is filed at: https://github.com/eliranwong/computemate/blob/main/tests/test3.md
 
 Remarks: This customised AgentMake AI MCP Server was used for this test - https://github.com/eliranwong/agentmakemcp/blob/main/examples/bible_study.py
 
@@ -114,7 +114,7 @@ Remarks: This customised AgentMake AI MCP Server was used for this test - https:
 ### Custom Features
 
 *   [ ] options to unload some or all built-in tools
-*   [ ] custom XoMate AI system prompts
+*   [ ] custom ComputeMate AI system prompts
 *   [ ] edit master plan
 *   [ ] iteration allowance
 *   [ ] change tools
@@ -122,25 +122,23 @@ Remarks: This customised AgentMake AI MCP Server was used for this test - https:
 
 ... more ...
 
-## Install (upcoming ...)
+## Install
 
 ```bash
-pip install --upgrade xomate
+pip install --upgrade computemate
 ```
 
-Attention: The `xomate` package is currently mirroring the `agentmakemcp` package. Once the development of XoMate AI reaches the production stage, the actual `xomate` package will be uploaded.
+### Extra
 
-# Action Menu
+To support Google Vertex AI, install with:
 
-* `[blank]` lanuch action menu
-* `.new` new conversation (ctrl+n)
-* `.quit` quit (ctrl+q)
-* `.chat` enable chat mode
-* `.agent` enable agent mode
-* `.backend` configure backend
-* `.mcp` configure mcp
+```bash
+pip install --upgrade "computemate[genai]"
+```
 
-Tips: Enter `.` to get input suggestions.
+# Configure MCP Servers
+
+Enter `.mcp` in ComputeMate AI prompt.
 
 ## License
 

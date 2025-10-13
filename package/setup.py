@@ -2,6 +2,10 @@ from setuptools import setup
 from setuptools.command.install import install
 import os, shutil, platform, sys
 
+version = "0.1.70"
+with open(os.path.join("computemate", "version.txt"), "w", encoding="utf-8") as fileObj:
+    fileObj.write(version)
+
 # package name
 package_name_0 = "package_name.txt"
 with open(package_name_0, "r", encoding="utf-8") as fileObj:
@@ -24,12 +28,15 @@ with open(os.path.join(package, "requirements.txt"), "r") as fileObj:
         if mod:
             install_requires.append(mod)
 
+# make sure config.py is empty
+open(os.path.join(package, "config.py"), "w").close()
+
 # https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/
 setup(
     name=package,
-    version="0.0.13",
-    python_requires=">=3.8, <3.13",
-    description=f"AgentMake AI MCP Servers - Easy setup of MCP servers running AgentMake AI agentic components.",
+    version=version,
+    python_requires=">=3.10, <3.13",
+    description=f"ComputeMate AI - Power up your productivity",
     long_description=long_description,
     author="Eliran Wong",
     author_email="support@toolmate.ai",
@@ -37,28 +44,34 @@ setup(
         package,
         f"{package}.core",
         f"{package}.ui",
+        f"{package}.etextedit",
+        f"{package}.etextedit.plugins",
     ],
     package_data={
         package: ["*.*"],
         f"{package}.core": ["*.*"],
         f"{package}.ui": ["*.*"],
+        f"{package}.etextedit": ["*.*"],
+        f"{package}.etextedit.plugins": ["*.*"],
     },
     license="GNU General Public License (GPL)",
     install_requires=install_requires,
     extras_require={
-        'genai': ["google-genai>=1.25.0"],  # Dependencies for running Vertex AI
+        'genai': ["google-genai>=1.42.0"],  # Dependencies for running Vertex AI
     },
     entry_points={
         "console_scripts": [
+            f"cpm={package}.main:main",
             f"{package}={package}.main:main",
+            f"{package}mcp={package}.main:mcp",
         ],
     },
     keywords="mcp agent toolmate ai anthropic azure chatgpt cohere deepseek genai github googleai groq llamacpp mistral ollama openai vertexai xai",
     url="https://toolmate.ai",
     project_urls={
-        "Source": "https://github.com/eliranwong/xomate",
-        "Tracker": "https://github.com/eliranwong/xomate/issues",
-        "Documentation": "https://github.com/eliranwong/xomate/wiki",
+        "Source": "https://github.com/eliranwong/computemate",
+        "Tracker": "https://github.com/eliranwong/computemate/issues",
+        "Documentation": "https://github.com/eliranwong/computemate/wiki",
         "Funding": "https://www.paypal.me/toolmate",
     },
     classifiers=[
@@ -81,8 +94,9 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
+        #'Programming Language :: Python :: 3.8',
+        #'Programming Language :: Python :: 3.9',
+        # currently, fastmcp supports 3.10-3.12
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',

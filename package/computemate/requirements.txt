@@ -1,0 +1,7 @@
+agentmake>=1.1.10
+agentmakemcp>=0.0.8
+fastmcp[cli]
+rich
+alive-progress
+click
+tabulate
