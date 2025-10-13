@@ -1,4 +1,8 @@
 {
     # Check configuration format at https://gofastmcp.com/clients/client#configuration-format
-    #"weather": {"url": "https://weather-api.example.com/mcp"}, # <- an exmaple
+    # For example:
+    #"github": {
+    #    "url": "https://api.githubcopilot.com/mcp",
+    #    "headers": {"Authorization": os.getenv("GITHUB_TOKEN")},
+    #},
 }

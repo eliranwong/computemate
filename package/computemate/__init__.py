@@ -138,5 +138,7 @@ def get_mcp_config_file():
 
 def edit_mcp_config_file(mcp_config_file=""):
     if not mcp_config_file:
-        mcp_config_file = get_mcp_config_file()
+        mcp_config_file = os.path.join(COMPUTEMATE_USER_DIR, "mcp_configurations.py")
+        if not os.path.isfile(mcp_config_file):
+            shutil.copy(os.path.join(COMPUTEMATE_PACKAGE_PATH, "mcp_configurations.py"), mcp_config_file)
     os.system(f'''{DEFAULT_TEXT_EDITOR} "{mcp_config_file}"''')

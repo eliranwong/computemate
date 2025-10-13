@@ -112,8 +112,8 @@ async def initialize_app(client):
             "description": t.description,
             "parameters": {
                 "type": "object",
-                "properties": t.inputSchema["properties"],
-                "required": t.inputSchema["required"],
+                "properties": t.inputSchema.get("properties", {}),
+                "required": t.inputSchema.get("required", []),
             },
         }
         tools_schema[t.name] = schema
