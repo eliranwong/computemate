@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools.command.install import install
 import os, shutil, platform, sys
 
-version = "0.1.75"
+version = "0.1.84"
 with open(os.path.join("computemate", "version.txt"), "w", encoding="utf-8") as fileObj:
     fileObj.write(version)
 
@@ -44,6 +44,7 @@ setup(
         package,
         f"{package}.core",
         f"{package}.ui",
+        f"{package}.mcp",
         f"{package}.etextedit",
         f"{package}.etextedit.plugins",
     ],
@@ -51,6 +52,7 @@ setup(
         package: ["*.*"],
         f"{package}.core": ["*.*"],
         f"{package}.ui": ["*.*"],
+        f"{package}.mcp": ["*.*"],
         f"{package}.etextedit": ["*.*"],
         f"{package}.etextedit.plugins": ["*.*"],
     },

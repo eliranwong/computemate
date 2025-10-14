@@ -7,6 +7,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 
+<img width="1732" height="1258" alt="Image" src="https://github.com/user-attachments/assets/cb1efd96-2970-4070-a4e1-13819d5c49f9" />
+
 For professionals, teams, and innovators who need more than just chat-based AI, computemate.ai is an intelligent automation agent that plans, coordinates, and executes tasks across multiple tools. Unlike basic AI chatbots, computemate.ai doesn’t just answer—it gets things done.
 
 ## Core Messaging
@@ -96,6 +98,14 @@ pip install --upgrade "computemate[genai]"
 
 > pip install -e .
 
+### Quick Start
+
+Run commands either `computemate` or `cpm`.
+
+### CLI Options
+
+> computemate -h
+
 ## 🗣️ AI Modes
 
 You can select between three AI modes to suit your preferences:
@@ -108,7 +118,7 @@ You can select between three AI modes to suit your preferences:
 
 To switch between modes, use the `.mode` command in the ComputeMate AI prompt. This will open a selection dialog where you can choose your preferred mode.
 
-<img width="714" height="271" alt="Image" src="https://github.com/user-attachments/assets/f836a0ad-ae77-4b07-bb74-f9af5bce26c6" />
+<img width="1732" height="1258" alt="Image" src="https://github.com/user-attachments/assets/d5aca1b6-1a06-4eeb-b93d-0b1387a9932e" />
 
 ## ⚙️ Configure AI Backend
 
@@ -126,11 +136,15 @@ You may override the default AI backend temporarily by using the CLI option `-b`
 
 Enter `.mcp` in ComputeMate AI prompt.
 
+<img width="1732" height="1258" alt="Image" src="https://github.com/user-attachments/assets/40b7aafa-7fac-4613-b769-c417da045d0e" />
+
 ## Configure Available Tools
 
 Enter `.tools` in ComputeMate AI prompt.
 
 Select / deselect to enable / disable tools.
+
+<img width="1732" height="1258" alt="Image" src="https://github.com/user-attachments/assets/5045c0bf-7e65-46e6-be7d-a4f1e891247f" />
 
 ## 🏃 Action Menu
 

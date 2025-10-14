@@ -159,11 +159,11 @@ Get a static text-based response directly from a text-based AI model without usi
         prompts_schema[p.name] = schema
     
     resources_raw = await client.list_resources()
-    resources = {r.name: r.description for r in resources_raw}
+    resources = {r.name: (r.description, str(r.uri)) for r in resources_raw}
     resources = dict(sorted(resources.items()))
 
     templates_raw = await client.list_resource_templates()
-    templates = {r.name: r.description for r in templates_raw}
+    templates = {r.name: (r.description, r.uriTemplate) for r in templates_raw}
     templates = dict(sorted(templates.items()))
     
     return tools, tools_schema, master_available_tools, available_tools, tool_descriptions, prompts, prompts_schema, resources, templates
@@ -230,7 +230,7 @@ async def main_async():
     # get mcp sefver configurations
     config_mcp = eval(readTextFile(get_mcp_config_file()))
     # add computemate mcp server
-    builtin_mcp_server = os.path.join(COMPUTEMATE_PACKAGE_PATH, "computemate_mcp.py")
+    builtin_mcp_server = os.path.join(COMPUTEMATE_PACKAGE_PATH, "mcp", "computemate_mcp.py")
     user_mcp_server = os.path.join(AGENTMAKE_USER_DIR, "computemate", "computemate_mcp.py") # The user path has the same basename as the built-in one; users may copy the built-in server settings to this location for customization. 
     computemate_mcp_server = user_mcp_server if os.path.isfile(user_mcp_server) else builtin_mcp_server
     config_mcp["computemate"] = {"command": "python", "args": [computemate_mcp_server]}
@@ -358,6 +358,10 @@ async def main_async():
                     cmd = "cd" if USER_OS == "Windows" else "pwd"
                 cmd_output, cwd = run_system_command(cmd)
                 display_info(console, cmd_output)
+                messages += [
+                    {"role": "user", "content": f"Run system command:\n\n```\n{cmd}\n```"},
+                    {"role": "assistant", "content": cmd_output},
+                ]
                 if (not pre_cwd == cwd) and os.path.isdir(cwd):
                     os.chdir(cwd)
                     display_info(console, cwd, title="Current Directory")
@@ -381,8 +385,9 @@ async def main_async():
 
             # display resources
             if user_request.startswith("//") and user_request[2:] in resources:
-                resource = user_request[2:]
-                resource_content = await client.read_resource(f"resource://{resource}")
+                resource_name = user_request[2:]
+                uri = resources[resource_name][1]
+                resource_content = await client.read_resource(uri)
                 if hasattr(resource_content[0], 'text'):
                     resource_text = resource_content[0].text
                     if resource_text.startswith("{"):
@@ -390,38 +395,29 @@ async def main_async():
                         display_content = "\n".join([f"- `{k}`: {v}" for k, v in resource_dict.items()])
                     else:
                         display_content = resource_text
-                    resource_description = resources.get(resource, "")
-                    info = Markdown(f"## Information - `{resource.capitalize()}`\n\n{resource_description}\n\n{display_content}")
+                    resource_description = resources.get(resource_name, "")
+                    if resource_description:
+                        resource_description = resource_description[0]
+                    info = Markdown(f"## Information - `{resource_name.capitalize()}`\n\n{resource_description}\n\n{display_content}")
                     display_info(console, info)
                 continue
-
-            # run templates
-            # ...
 
             if not user_request:
                 continue
 
+            # run templates
             if re.search(template_pattern, user_request):
                 user_request = urllib.parse.quote(user_request)
                 try:
-                    uri = re.sub("^(.*?)/", r"\1://", user_request[2:])
+                    template_name, template_args = user_request[2:].split("/", 1)
+                    if template_name in ("computemate_ls", "ls"):
+                        if not template_args:
+                            template_args = "."
+                        else:
+                            template_args = template_args.replace("/", "%2F")
+                    uri = re.sub("{.*?$", "", templates[template_name][1])+template_args
                     resource_content = await client.read_resource(uri)
                     resource_content = resource_content[0].text
-                    while resource_content.startswith("[") and resource_content.endswith("]"):
-                        options = json.loads(resource_content)
-                        select = await DIALOGS.getValidOptions(
-                            options=options,
-                            title="Multiple Matches",
-                            text="Select one of them to continue:"
-                        )
-                        if select:
-                            if user_request.startswith("//name/"):
-                                resource_content = select
-                            else:
-                                resource_content = await client.read_resource(re.sub("^(.*?/)[^/]*?$", r"\1", uri)+urllib.parse.quote(select.replace("/", "「」")))
-                                resource_content = resource_content[0].text
-                        else:
-                            resource_content = "Cancelled by user."
                     if resource_content:
                         messages += [
                             {"role": "user", "content": f"Retrieve content from:\n\n{uri}"},
@@ -588,8 +584,8 @@ Viist https://github.com/eliranwong/computemate
                     info = Markdown("## Available Tools\n\n"+"\n".join(tools_descriptions))
                     display_info(console, info)
                 elif user_request == ".resources":
-                    resources_descriptions = [f"- `//{name}`: {description}" for name, description in resources.items()]
-                    templates_descriptions = [f"- `//{name}/...`: {description}" for name, description in templates.items()]
+                    resources_descriptions = [f"- `//{name}`: {description[0]}" for name, description in resources.items()]
+                    templates_descriptions = [f"- `//{name}/...`: {description[0]}" for name, description in templates.items()]
                     info = Markdown("## Available Information\n\n"+"\n".join(resources_descriptions)+"\n\n## Available Resources\n\n"+"\n".join(templates_descriptions))
                     display_info(console, info)
                 elif user_request == ".plans":
@@ -1019,7 +1015,7 @@ Available tools are: {available_tools}.
                     else:
                         next_tool_description = tools.get(next_tool, "No description available.")
                         system_tool_instruction = get_system_tool_instruction(next_tool, next_tool_description)
-                        next_step = agentmake(next_suggestion, system=system_tool_instruction, **AGENTMAKE_CONFIG)[-1].get("content", "").strip()
+                        next_step = agentmake([{"role": "system", "content": system_tool_instruction}]+messages[len(DEFAULT_MESSAGES):], follow_up_prompt=next_suggestion, **AGENTMAKE_CONFIG)[-1].get("content", "").strip()
                 await thinking(get_next_step, "Crafting the next instruction ...")
                 # partner mode
                 if config.agent_mode == False:

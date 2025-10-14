@@ -40,12 +40,13 @@ def getResponse(messages:list) -> str:
 def info() -> str:
     """Display ComputeMate AI information"""
     info = "ComputeMate AI " + readTextFile(os.path.join(COMPUTEMATE_PACKAGE_PATH, "version.txt"))
-    info += "\n\nSource: https://github.com/eliranwong/computemate\nDeveloper: Eliran Wong"
+    info += "\n\nSource: https://github.com/eliranwong/computemate\n\nDeveloper: Eliran Wong"
     return info
 
-@mcp.resource("content://{directory}")
-def content(directory:str) -> str:
+@mcp.resource("ls://{directory}")
+def ls(directory:str) -> str:
     """List content of a directory"""
+    directory = os.path.expanduser(directory.replace("%2F", "/"))
     if os.path.isdir(directory):
         folders = []
         files = []
