@@ -1,7 +1,7 @@
 from computemate.core.systems import *
 from computemate.ui.text_area import getTextArea
 from computemate.ui.info import get_banner
-from computemate import config, DIALOGS, COMPUTEMATE_VERSION, AGENTMAKE_CONFIG, COMPUTEMATE_PACKAGE_PATH, COMPUTEMATE_USER_DIR, COMPUTEMATEDATA, fix_string, write_user_config, edit_mcp_config_file, get_mcp_config_file
+from computemate import config, DIALOGS, COMPUTEMATE_VERSION, AGENTMAKE_CONFIG, COMPUTEMATE_PACKAGE_PATH, COMPUTEMATE_USER_DIR, COMPUTEMATEDATA, fix_string, write_user_config, edit_mcp_config_file, get_mcp_config_file, run_system_command, list_dir_content
 from pathlib import Path
 import urllib.parse
 import asyncio, re, os, subprocess, click, gdown, pprint, argparse, json, zipfile, warnings, sys
@@ -9,6 +9,7 @@ from copy import deepcopy
 from alive_progress import alive_bar
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
+from agentmake.utils.system import getDeviceInfo
 from agentmake import agentmake, getOpenCommand, getDictionaryOutput, edit_file, edit_configurations, readTextFile, writeTextFile, getCurrentDateTime, AGENTMAKE_USER_DIR, USER_OS, DEVELOPER_MODE, DEFAULT_AI_BACKEND, DEFAULT_TEXT_EDITOR
 from agentmake.utils.files import searchFolder, isExistingPath
 from agentmake.etextedit import launch_async
@@ -212,19 +213,6 @@ def backup_conversation(messages, master_plan, console=None, storage_path=None):
             info = f"Conversation saved to: {storage_path}\nReport saved to: {html_file}"
             display_info(console, info)
 
-def run_system_command(cmd: str):
-    cmd += " && cd" if USER_OS == "Windows" else " && pwd"
-    text_output = subprocess.run(
-        cmd,
-        shell=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-    lines = text_output.split("\n")
-    if len(lines) == 1:
-        return "Done!", lines[0]
-    return "\n".join(lines[:-1]), lines[-1]
-
 async def main_async():
 
     # get mcp sefver configurations
@@ -235,9 +223,9 @@ async def main_async():
     computemate_mcp_server = user_mcp_server if os.path.isfile(user_mcp_server) else builtin_mcp_server
     config_mcp["computemate"] = {"command": "python", "args": [computemate_mcp_server]}
     # format config dict
-    config_mcp = {"mcpServers": config_mcp}
+    config_mcp_client = {"mcpServers": config_mcp}
     # set client
-    client = Client(config_mcp)
+    client = Client(config_mcp_client)
 
     APP_START = True
     DEFAULT_SYSTEM = "You are ComputeMate AI, an autonomous agent designed to assist users with using computers."
@@ -320,6 +308,9 @@ async def main_async():
                     if latest_version and latest_version > version.parse(COMPUTEMATE_VERSION):
                         info = f"A new version of ComputeMate AI is available: {latest_version} (you are using {COMPUTEMATE_VERSION}).\nTo upgrade, close `ComputeMate AI` first and run `pip install --upgrade computemate`."
                         display_info(console, info)
+                    # list current directory content
+                    cwd = os.getcwd()
+                    display_info(console, list_dir_content(cwd), title=cwd)
                     # check connection
                     if not config.skip_connection_check:
                         try:
@@ -334,7 +325,7 @@ async def main_async():
             # Original user request
             # note: `python3 -m rich.emoji` for checking emoji
             console.print("Enter your request :smiley: :" if len(messages) == len(DEFAULT_MESSAGES) else "Enter a follow-up request :flexed_biceps: :")
-            input_suggestions = list(config.action_list.keys())+["@ ", "@@ "]+[f"@{t} " for t in available_tools]+[f"{p} " for p in prompt_list]+[f"//{r}" for r in resources.keys()]+template_list+resource_suggestions
+            input_suggestions = list(config.action_list.keys())+["@ ", "@@ "]+[f"@{t} " for t in available_tools]+[f"{p} " for p in prompt_list]+[f"//{r}" for r in resources.keys()]+template_list+resource_suggestions+sorted(os.listdir("."))+[f"??{i}?? " for i in sorted(os.listdir("."))]+config.custom_input_suggestions
             if args.default:
                 user_request = " ".join(args.default).strip()
                 args.default = None # reset to avoid repeated use
@@ -348,7 +339,9 @@ async def main_async():
                 config.current_prompt = readTextFile(check_path)
                 continue
             # luanch action menu
-            if user_request == ".":
+            if not user_request:
+                continue
+            elif user_request == ".":
                 select = await DIALOGS.getValidOptions(options=config.action_list.keys(), descriptions=[i.capitalize() for i in config.action_list.values()], title="Action Menu", text="Select an action:")
                 user_request = select if select else ""
             elif user_request.startswith("!"):
@@ -357,17 +350,23 @@ async def main_async():
                 if not cmd:
                     cmd = "cd" if USER_OS == "Windows" else "pwd"
                 cmd_output, cwd = run_system_command(cmd)
-                display_info(console, cmd_output)
+                display_info(console, Markdown(f"```\n{cmd_output}\n```"))
                 messages += [
                     {"role": "user", "content": f"Run system command:\n\n```\n{cmd}\n```"},
-                    {"role": "assistant", "content": cmd_output},
+                    {"role": "assistant", "content": f"```output\n{cmd_output}\n```"},
                 ]
                 if (not pre_cwd == cwd) and os.path.isdir(cwd):
                     os.chdir(cwd)
-                    display_info(console, cwd, title="Current Directory")
+                    display_info(console, list_dir_content(cwd), title=cwd)
                 continue
-            if not user_request:
-                continue
+            elif re.search(r"\?\?(.*?)\?\? ", user_request+" "):
+                fileList = [os.path.abspath(i) for i in re.findall(r"\?\?(.*?)\?\? ", user_request+" ")]
+                new_user_request = re.sub(r"\?\?(.*?)\?\? ", "", user_request+" ").strip()
+                new_user_request = f'''# File List\n\n{fileList}\n\n# User Request\n\n{new_user_request}'''
+                if config.agent_mode is None and not user_request.startswith("@"):
+                    user_request = ("@computemate_ask_files " if len(config_mcp) > 1 else "@ask_files ") + "\n\n" + new_user_request
+                else:
+                    user_request = new_user_request
             if user_request == ".ideas":
                 # Generate ideas for `prompts to try`
                 ideas = ""
@@ -859,16 +858,20 @@ Viist https://github.com/eliranwong/computemate
                     try:
                         tool_schema = tools_schema[tool]
                         tool_properties = tool_schema["parameters"]["properties"]
-                        if len(tool_properties) == 1 and "request" in tool_properties: # AgentMake MCP Servers or alike
-                            if "items" in tool_properties["request"]: # requires a dictionary instead of a string
-                                request_dict = [{"role": "system", "content": DEFAULT_SYSTEM}]+messages[len(messages)-2:] if config.lite else deepcopy(messages)
-                                tool_result = await client.call_tool(tool, {"request": request_dict}, timeout=config.mcp_timeout)
-                            else:
-                                tool_result = await client.call_tool(tool, {"request": tool_instruction}, timeout=config.mcp_timeout)
+                        if tool in ("computemate_execute_task", "execute_task"):
+                            tool_instruction = "# Instruction\n\n"+tool_instruction+"\n\n# Supplementary Device Information\n\n"+getDeviceInfo()
+                            tool_result = agentmake(tool_instruction, **{'tool': 'execute_task'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         else:
-                            structured_output = getDictionaryOutput(messages=messages, schema=tool_schema, backend=config.backend)
-                            tool_result = await client.call_tool(tool, structured_output, timeout=config.mcp_timeout)
-                        tool_result = tool_result.content[0].text
+                            if len(tool_properties) == 1 and "request" in tool_properties: # AgentMake MCP Servers or alike
+                                if "items" in tool_properties["request"]: # requires a dictionary instead of a string
+                                    request_dict = [{"role": "system", "content": DEFAULT_SYSTEM}]+messages[len(messages)-2:] if config.lite else deepcopy(messages)
+                                    tool_result = await client.call_tool(tool, {"request": request_dict}, timeout=config.mcp_timeout)
+                                else:
+                                    tool_result = await client.call_tool(tool, {"request": tool_instruction}, timeout=config.mcp_timeout)
+                            else:
+                                structured_output = getDictionaryOutput(messages=messages, schema=tool_schema, backend=config.backend)
+                                tool_result = await client.call_tool(tool, structured_output, timeout=config.mcp_timeout)
+                            tool_result = tool_result.content[0].text
                         messages[-1]["content"] += f"\n\n[Using tool `{tool}`]"
                         messages.append({"role": "assistant", "content": tool_result if tool_result.strip() else "Tool error!"})
                     except Exception as e:

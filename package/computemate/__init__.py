@@ -1,7 +1,7 @@
-from agentmake import AGENTMAKE_USER_DIR, DEFAULT_TEXT_EDITOR, readTextFile, writeTextFile
+from agentmake import USER_OS, AGENTMAKE_USER_DIR, DEFAULT_TEXT_EDITOR, readTextFile, writeTextFile
 from pathlib import Path
 from computemate.ui.selection_dialog import TerminalModeDialogs
-import os, shutil, pprint
+import os, shutil, pprint, subprocess
 
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.py")
 CONFIG_FILE_BACKUP = os.path.join(AGENTMAKE_USER_DIR, "computemate", "config.py")
@@ -23,6 +23,7 @@ default_config = '''banner_title=""
 *mcp_port=33333
 *mcp_timeout=9999999999
 *embedding_model="paraphrase-multilingual"
+*custom_input_suggestions=[]
 *disabled_tools=[]'''
 
 if readTextFile(CONFIG_FILE).strip() == "":
@@ -52,6 +53,7 @@ max_log_lines={config.max_log_lines}
 mcp_port={config.mcp_port}
 mcp_timeout={config.mcp_timeout}
 embedding_model="{config.embedding_model}"
+custom_input_suggestions={pprint.pformat(config.custom_input_suggestions)}
 disabled_tools={pprint.pformat(config.disabled_tools)}"""
     writeTextFile(CONFIG_FILE_BACKUP if backup else CONFIG_FILE, configurations)
 
@@ -120,7 +122,6 @@ AGENTMAKE_CONFIG = {
     "print_on_terminal": False,
     "word_wrap": False,
 }
-OLLAMA_NOT_FOUND = "`Ollama` is not found! ComputeMate AI uses `Ollama` to generate embeddings for semantic searches. You may install it from https://ollama.com/ so that you can perform semantic searches with ComputeMate AI."
 COMPUTEMATE_VERSION = readTextFile(os.path.join(os.path.dirname(os.path.realpath(__file__)), "version.txt"))
 COMPUTEMATE_PACKAGE_PATH = os.path.dirname(os.path.realpath(__file__))
 COMPUTEMATE_USER_DIR = os.path.join(AGENTMAKE_USER_DIR, "computemate")
@@ -142,3 +143,31 @@ def edit_mcp_config_file(mcp_config_file=""):
         if not os.path.isfile(mcp_config_file):
             shutil.copy(os.path.join(COMPUTEMATE_PACKAGE_PATH, "mcp_configurations.py"), mcp_config_file)
     os.system(f'''{DEFAULT_TEXT_EDITOR} "{mcp_config_file}"''')
+
+def run_system_command(cmd: str):
+    cmd += " && cd" if USER_OS == "Windows" else " && pwd"
+    result = subprocess.run(
+        cmd,
+        shell=True,
+        capture_output=True,
+        text=True,
+    )
+    text_output = result.stdout.strip()
+    text_error = result.stderr.strip()
+    lines = text_output.split("\n")
+    if len(lines) == 1:
+        return text_error if text_error else"Done!", lines[0]
+    return "\n".join(lines[:-1]), lines[-1]
+
+def list_dir_content(directory:str="."):
+    directory = os.path.expanduser(directory.replace("%2F", "/"))
+    if os.path.isdir(directory):
+        folders = []
+        files = []
+        for item in sorted(os.listdir(directory)):
+            if os.path.isdir(os.path.join(directory, item)):
+                folders.append(f"📁 {item}")
+            else:
+                files.append(f"📄 {item}")
+        return " ".join(folders) + ("\n\n" if folders and files else "") + " ".join(files)
+    return "Invalid path!"
