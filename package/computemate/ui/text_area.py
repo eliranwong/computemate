@@ -181,7 +181,7 @@ async def getTextArea(input_suggestions:list=None, default_entry="", title="", m
         @bindings.add("c-g")
         def _(event):
             config.current_prompt = text_area.text
-            event.app.exit(result=".autosuggestions")
+            event.app.exit(result=".autosuggest")
         # improve prompt
         @bindings.add("escape", "p")
         def _(event):
@@ -200,12 +200,22 @@ async def getTextArea(input_suggestions:list=None, default_entry="", title="", m
         @bindings.add("c-p")
         def _(event):
             config.current_prompt = text_area.text
-            event.app.exit(result=".promptengineer")
-        # conversation menu
-        #@bindings.add("escape", "c")
-        #def _(event):
-        #    config.current_prompt = text_area.text
-        #    event.app.exit(result="[CONVERSATION]")
+            event.app.exit(result=".autoprompt")
+        # show directory content
+        @bindings.add("escape", "c")
+        def _(event):
+            config.current_prompt = text_area.text
+            event.app.exit(result=".content")
+        # toggle auto tool selection in chat mode
+        @bindings.add("escape", "t")
+        def _(event):
+            config.current_prompt = text_area.text
+            event.app.exit(result=".autotool")
+        # change directory
+        @bindings.add("c-c")
+        def _(event):
+            config.current_prompt = text_area.text
+            event.app.exit(result=".directory")
         # write prompts or plans
         @bindings.add("c-w")
         def _(event):

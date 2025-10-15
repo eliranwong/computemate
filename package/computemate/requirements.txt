@@ -4,4 +4,4 @@ fastmcp[cli]
 rich
 alive-progress
 click
-tabulate
+googlesearch-python

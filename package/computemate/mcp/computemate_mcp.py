@@ -7,7 +7,6 @@ from agentmake import agentmake, DEVELOPER_MODE, readTextFile
 from agentmake.utils.system import getDeviceInfo
 from computemate import COMPUTEMATE_VERSION, COMPUTEMATE_PACKAGE_PATH, COMPUTEMATEDATA, AGENTMAKE_CONFIG, config, list_dir_content
 from typing import List, Dict, Any, Union
-from tabulate import tabulate
 
 # configure backend
 AGENTMAKE_CONFIG["backend"] = config.backend
@@ -49,8 +48,8 @@ def device() -> str:
     """Show Device Information"""
     return "- "+getDeviceInfo().replace("\n", "\n- ")
 
-@mcp.resource("ls://{directory}")
-def ls(directory:str) -> str:
+@mcp.resource("content://{directory}")
+def content(directory:str) -> str:
     """List content of a directory"""
     return list_dir_content(directory)
 

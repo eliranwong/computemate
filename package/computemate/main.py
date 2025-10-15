@@ -335,7 +335,7 @@ async def main_async():
                 master_plan = ""
             # open a text file as a prompt
             check_path = isExistingPath(user_request)
-            if check_path:
+            if check_path and not user_request == ".":
                 config.current_prompt = readTextFile(check_path)
                 continue
             # luanch action menu
@@ -409,11 +409,10 @@ async def main_async():
                 user_request = urllib.parse.quote(user_request)
                 try:
                     template_name, template_args = user_request[2:].split("/", 1)
-                    if template_name in ("computemate_ls", "ls"):
-                        if not template_args:
-                            template_args = "."
-                        else:
-                            template_args = template_args.replace("/", "%2F")
+                    if template_name in ("computemate_content", "content"):
+                        if not template_args or template_args == ".":
+                            template_args = os.getcwd()
+                        template_args = template_args.replace("/", "%2F")
                     uri = re.sub("{.*?$", "", templates[template_name][1])+template_args
                     resource_content = await client.read_resource(uri)
                     resource_content = resource_content[0].text
@@ -437,7 +436,6 @@ async def main_async():
             if user_request.startswith(".open") or user_request.startswith(".import") or user_request.startswith(".reload"):
                 cwd = os.getcwd()
             if user_request == ".open":
-                os.chdir(COMPUTEMATE_USER_DIR)
                 open_item = await DIALOGS.getInputDialog(title="Open", text="Enter a file or folder path:", suggestions=PathCompleter())
                 if not open_item:
                     open_item = os.getcwd()
@@ -552,6 +550,9 @@ Viist https://github.com/eliranwong/computemate
 - `Esc+G`: generate ideas for prompts to try
 - `Ctrl+P`: toggle auto prompt engineering
 - `Esc+P`: improve prompt content
+- `Esc+T`: toggle auto tool selection in chat mode
+- `Ctrl+C`: change directory
+- `Esc+C`: show current directory content
 - `Ctrl+D`: delete
 - `Ctrl+H`: backspace
 - `Ctrl+W`: delete previous word
@@ -698,16 +699,51 @@ Viist https://github.com/eliranwong/computemate
                         except:
                             info = "Invalid input."
                             display_info(console, info)
-                elif user_request == ".promptengineer":
+                elif user_request == ".content":
+                    cwd = os.getcwd()
+                    display_info(console, list_dir_content(cwd), title=cwd)
+                elif user_request == ".autoprompt":
                     config.prompt_engineering = not config.prompt_engineering
                     write_user_config()
                     info = f"Prompt Engineering {'Enabled' if config.prompt_engineering else 'Disabled'}!"
                     display_info(console, info)
-                elif user_request == ".autosuggestions":
+                elif user_request == ".autosuggest":
                     config.auto_suggestions = not config.auto_suggestions
                     write_user_config()
                     info = f"Auto Input Suggestions {'Enabled' if config.auto_suggestions else 'Disabled'}!"
                     display_info(console, info)
+                elif user_request == ".autotool":
+                    config.auto_tool_selection = not config.auto_tool_selection
+                    write_user_config()
+                    info = f"Auto Tool Selection in Chat Mode {'Enabled' if config.auto_tool_selection else 'Disabled'}!"
+                    display_info(console, info)
+                elif user_request == ".autocorrect":
+                    config.auto_code_correction = not config.auto_code_correction
+                    write_user_config()
+                    info = f"Auto Code Correction {'Enabled' if config.auto_code_correction else 'Disabled'}!"
+                    display_info(console, info)
+                elif user_request == ".directory":
+                    directory = os.getcwd()
+                    while directory and not directory == ".":
+                        options = [".", ".."]+[i for i in os.listdir(directory) if os.path.isdir(os.path.join(directory, i))]
+                        select = await DIALOGS.getValidOptions(
+                            options=options,
+                            title="Change Directory",
+                            text="Select a directory:"
+                        )
+                        if select:
+                            if select == ".":
+                                break
+                            elif select == "..":
+                                directory = os.path.dirname(directory)
+                            else:
+                                directory = os.path.join(directory, select)
+                        else:
+                            break
+                    if select:
+                        os.chdir(directory)
+                        cwd = os.getcwd()
+                        display_info(console, list_dir_content(cwd), title=cwd)
                 elif user_request == ".lite":
                     config.lite = not config.lite
                     write_user_config()
@@ -758,6 +794,9 @@ Viist https://github.com/eliranwong/computemate
                     messages = deepcopy(DEFAULT_MESSAGES)
                     console.clear()
                     console.print(get_banner(COMPUTEMATE_VERSION))
+                    # show current directory content
+                    cwd = os.getcwd()
+                    display_info(console, list_dir_content(cwd), title=cwd)
                 continue
 
             # Check if a single tool is specified
@@ -767,6 +806,10 @@ Viist https://github.com/eliranwong/computemate
             # Tool selection systemm message
             system_tool_selection = get_system_tool_selection(available_tools, tool_descriptions)
 
+            # auto tool selection in chat mode
+            if config.agent_mode is None and config.auto_tool_selection and not user_request.startswith("@"):
+                user_request = f"@ {user_request}"
+            
             if user_request.startswith("@ "):
                 user_request = user_request[2:].strip()
                 # Single Tool Suggestion
@@ -788,7 +831,9 @@ Viist https://github.com/eliranwong/computemate
                 # Single Tool Selection
                 if config.agent_mode:
                     this_tool = suggested_tools[0] if suggested_tools else "get_direct_text_response"
-                else: # `partner` mode when config.agent_mode is set to False
+                elif config.agent_mode is None and suggested_tools[0] == "get_direct_text_response":
+                    this_tool = "get_direct_text_response"
+                else: # `partner` or `chat`mode when config.agent_mode is set to False or None
                     this_tool = await DIALOGS.getValidOptions(options=suggested_tools if suggested_tools else available_tools, title="Suggested Tools", text="Select a tool:")
                     if not this_tool:
                         this_tool = "get_direct_text_response"
@@ -860,7 +905,7 @@ Viist https://github.com/eliranwong/computemate
                         tool_properties = tool_schema["parameters"]["properties"]
                         if tool in ("computemate_execute_task", "execute_task"):
                             tool_instruction = "# Instruction\n\n"+tool_instruction+"\n\n# Supplementary Device Information\n\n"+getDeviceInfo()
-                            tool_result = agentmake(tool_instruction, **{'tool': 'execute_task'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                            tool_result = agentmake(tool_instruction, **{'tool': 'magic' if config.auto_code_correction else'execute_task'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         else:
                             if len(tool_properties) == 1 and "request" in tool_properties: # AgentMake MCP Servers or alike
                                 if "items" in tool_properties["request"]: # requires a dictionary instead of a string

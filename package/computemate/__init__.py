@@ -10,9 +10,11 @@ CONFIG_FILE_BACKUP = os.path.join(AGENTMAKE_USER_DIR, "computemate", "config.py"
 
 # restore config backup after upgrade
 default_config = '''banner_title=""
-*agent_mode=False
+*agent_mode=None
 *prompt_engineering=False
 *auto_suggestions=True
+*auto_tool_selection=True
+*auto_code_correction=True
 *max_steps=50
 *lite=False
 *web_browser=False
@@ -43,6 +45,8 @@ def write_user_config(backup=False):
 agent_mode={config.agent_mode}
 prompt_engineering={config.prompt_engineering}
 auto_suggestions={config.auto_suggestions}
+auto_tool_selection={config.auto_tool_selection}
+auto_code_correction={config.auto_code_correction}
 max_steps={config.max_steps}
 lite={config.lite}
 web_browser={config.web_browser}
@@ -97,10 +101,14 @@ config.action_list = {
     #".agent": "switch to agent mode",
     #".partner": "switch to partner mode",
     #".chat": "switch to chat mode",
-    ".autosuggestions": "toggle auto input suggestions",
-    ".promptengineer": "toggle auto prompt engineering",
+    ".autosuggest": "toggle auto input suggestions",
+    ".autoprompt": "toggle auto prompt engineering",
+    ".autotool": "toggle auto tool selection in chat mode",
+    ".autocorrect": "toggle auto code correction",
     ".lite": "toggle lite context",
     # file access
+    ".content": "show current directory content",
+    ".directory": "change directory",
     ".open": "open file or folder",
     #".download": "download data files",
     # help
