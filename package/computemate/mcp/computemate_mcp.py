@@ -4,7 +4,7 @@ from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp import FastMCP
 from fastmcp.prompts.prompt import PromptMessage, TextContent
 from agentmake import agentmake, DEVELOPER_MODE, readTextFile
-from computemate import COMPUTEMATE_PACKAGE_PATH, COMPUTEMATEDATA, AGENTMAKE_CONFIG, config
+from computemate import COMPUTEMATE_VERSION, COMPUTEMATE_PACKAGE_PATH, COMPUTEMATEDATA, AGENTMAKE_CONFIG, config
 from typing import List, Dict, Any, Union
 from tabulate import tabulate
 
@@ -39,7 +39,7 @@ def getResponse(messages:list) -> str:
 @mcp.resource("resource://info")
 def info() -> str:
     """Display ComputeMate AI information"""
-    info = "ComputeMate AI " + readTextFile(os.path.join(COMPUTEMATE_PACKAGE_PATH, "version.txt"))
+    info = "ComputeMate AI " + COMPUTEMATE_VERSION
     info += "\n\nSource: https://github.com/eliranwong/computemate\n\nDeveloper: Eliran Wong"
     return info
 
