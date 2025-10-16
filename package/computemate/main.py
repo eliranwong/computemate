@@ -906,6 +906,7 @@ Viist https://github.com/eliranwong/computemate
                 nonlocal messages
                 tool_instruction = fix_string(tool_instruction)
                 messages[-1]["content"] = fix_string(messages[-1]["content"])
+                request_dict = [{"role": "system", "content": DEFAULT_SYSTEM}]+messages[len(messages)-2:] if config.lite else deepcopy(messages)
                 if tool == "get_direct_text_response":
                     messages = agentmake(messages, system="auto", **AGENTMAKE_CONFIG)
                 else:
@@ -914,11 +915,29 @@ Viist https://github.com/eliranwong/computemate
                         tool_properties = tool_schema["parameters"]["properties"]
                         if tool in ("computemate_execute_task", "execute_task"):
                             tool_instruction = "# Instruction\n\n"+tool_instruction+"\n\n# Supplementary Device Information\n\n"+getDeviceInfo()
-                            tool_result = agentmake(tool_instruction, **{'tool': 'magic' if config.auto_code_correction else'execute_task'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                            tool_result = agentmake(tool_instruction, **{'tool': 'magic' if config.auto_code_correction else 'execute_task'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                        elif tool in ("computemate_email_outlook", "email_outlook", "computemate_email_gmail", "email_gmail"):
+                            tool_result = agentmake(tool_instruction, **{'tool': 'email/outlook' if 'outlook' in tool else 'email/gmail'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                        elif tool in ("computemate_calendar_outlook", "calendar_outlook", "computemate_calendar_google", "calendar_google"):
+                            tool_result = agentmake(tool_instruction, **{'input_content_plugin': 'convert_relative_datetime', 'tool': 'calendar/outlook' if 'outlook' in tool else 'calendar/google'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                        elif tool in ("computemate_teamwork", "teamwork"):
+                            this_AGENTMAKE_CONFIG = deepcopy(AGENTMAKE_CONFIG)
+                            this_AGENTMAKE_CONFIG["print_on_terminal"] = True
+                            this_AGENTMAKE_CONFIG["word_wrap"] = True
+                            tool_result = agentmake(request_dict, **{'agent': 'teamwork'}, **this_AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                        elif tool in ("computemate_reflection_agent", "reflection_agent"):
+                            this_AGENTMAKE_CONFIG = deepcopy(AGENTMAKE_CONFIG)
+                            this_AGENTMAKE_CONFIG["print_on_terminal"] = True
+                            this_AGENTMAKE_CONFIG["word_wrap"] = True
+                            tool_result = agentmake(request_dict, **{'agent': 'deep_reflection'}, **this_AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                        elif tool in ("computemate_reasoning_agent", "reasoning_agent"):
+                            this_AGENTMAKE_CONFIG = deepcopy(AGENTMAKE_CONFIG)
+                            this_AGENTMAKE_CONFIG["print_on_terminal"] = True
+                            this_AGENTMAKE_CONFIG["word_wrap"] = True
+                            tool_result = agentmake(request_dict, **{'agent': 'reasoning'}, **this_AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         else:
                             if len(tool_properties) == 1 and "request" in tool_properties: # AgentMake MCP Servers or alike
                                 if "items" in tool_properties["request"]: # requires a dictionary instead of a string
-                                    request_dict = [{"role": "system", "content": DEFAULT_SYSTEM}]+messages[len(messages)-2:] if config.lite else deepcopy(messages)
                                     tool_result = await client.call_tool(tool, {"request": request_dict}, timeout=config.mcp_timeout)
                                 else:
                                     tool_result = await client.call_tool(tool, {"request": tool_instruction}, timeout=config.mcp_timeout)

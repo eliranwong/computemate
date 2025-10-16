@@ -323,6 +323,19 @@ Read more about `etextedit` at https://github.com/eliranwong/etextedit
 
 > sudo apt install texlive-full
 
+Other examples:
+
+```bash
+# Ubuntu/Debian
+sudo apt install texlive texlive-latex-extra
+
+# macOS
+brew install --cask mactex
+
+# Windows
+Download MiKTeX from https://miktex.org/download
+```
+
 ## Third-Party Text Editor [Optional]
 
 You can use a third-party text editor of your own choice. Enter `.backend` in the ComputeMate AI prompt and specify the value of `DEFAULT_TEXT_EDITOR` with a command that calls your favorite text editor, e.g. `micro -softwrap true -wordwrap true`. To use the built-in text editor `etextedit` for making changes, you simply need one step, i.e. either save `Ctrl+S` or exit `Ctrl+Q`, to return to the ComputeMate AI prompt. With third-party text editor, however, you need to save the changes first before exiting.
