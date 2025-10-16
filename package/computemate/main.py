@@ -325,7 +325,7 @@ async def main_async():
             # Original user request
             # note: `python3 -m rich.emoji` for checking emoji
             console.print("Enter your request :smiley: :" if len(messages) == len(DEFAULT_MESSAGES) else "Enter a follow-up request :flexed_biceps: :")
-            input_suggestions = list(config.action_list.keys())+["@ ", "@@ "]+[f"@{t} " for t in available_tools]+[f"{p} " for p in prompt_list]+[f"//{r}" for r in resources.keys()]+template_list+resource_suggestions+sorted(os.listdir("."))+[f"??{i}?? " for i in sorted(os.listdir("."))]+config.custom_input_suggestions
+            input_suggestions = list(config.action_list.keys())+["@ ", "@@ ", "!", "!!"]+[f"@{t} " for t in available_tools]+[f"{p} " for p in prompt_list]+[f"//{r}" for r in resources.keys()]+template_list+resource_suggestions+sorted(os.listdir("."))+[f"??{i}?? " for i in sorted(os.listdir("."))]+config.custom_input_suggestions
             if args.default:
                 user_request = " ".join(args.default).strip()
                 args.default = None # reset to avoid repeated use
@@ -354,13 +354,16 @@ async def main_async():
                     cmd = user_request[1:].strip()
                 if not cmd:
                     cmd = "cd" if USER_OS == "Windows" else "pwd"
+                if not record_cmd:
+                    os.system(cmd)
+                    print()
+                    continue
                 cmd_output, cwd = run_system_command(cmd)
                 display_info(console, Markdown(f"```\n{cmd_output}\n```"))
-                if record_cmd:
-                    messages += [
-                        {"role": "user", "content": f"Run system command:\n\n```\n{cmd}\n```"},
-                        {"role": "assistant", "content": f"```output\n{cmd_output}\n```"},
-                    ]
+                messages += [
+                    {"role": "user", "content": f"Run system command:\n\n```\n{cmd}\n```"},
+                    {"role": "assistant", "content": f"```output\n{cmd_output}\n```"},
+                ]
                 if (not pre_cwd == cwd) and os.path.isdir(cwd):
                     os.chdir(cwd)
                     display_info(console, list_dir_content(cwd), title=cwd)

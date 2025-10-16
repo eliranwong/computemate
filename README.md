@@ -102,7 +102,7 @@ or
 
 After `ComputeMate AI` is launched, enter your request in the ComputeMate AI prompt.
 
-Remarks: `ComputeMate AI` allows you to execute system commands directly. Simply prefix your commands with `!` or `!!`. Use `!` to include the command output in the ongoing conversation, and `!!` when you prefer not to display the output.
+Remarks: `ComputeMate AI` allows you to execute system commands directly. Simply prefix your commands with `!` or `!!`. Use `!` to integrate the command output into the ongoing conversation and to track any changes in the directory. Use `!!` when you prefer not to include the output or track directory changes.
 
 ### CLI Options
 
