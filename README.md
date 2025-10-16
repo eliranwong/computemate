@@ -1,8 +1,10 @@
 # ComputeMate AI
 
-> eXecute. Orchestrate. Automate.
+computemate.ai is an automation-first AI agent that takes your goals, creates a structured plan, and executes it by orchestrating multiple tools. It goes beyond conversation—delivering real results.
 
-**ComputeMate.AI is your autonomous execution engine—automating planning, orchestration, and execution of tasks using multiple tools to resolve user requests seamlessly.**
+*   **Execute**: Automatically carry out tasks from start to finish.
+*   **Orchestrate**: Seamlessly coordinate multiple tools and APIs.
+*   **Automate**: Save time and effort by letting computemate.ai handle complex workflows.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
@@ -10,16 +12,6 @@
 <img width="1732" height="1258" alt="Image" src="https://github.com/user-attachments/assets/cb1efd96-2970-4070-a4e1-13819d5c49f9" />
 
 For professionals, teams, and innovators who need more than just chat-based AI, computemate.ai is an intelligent automation agent that plans, coordinates, and executes tasks across multiple tools. Unlike basic AI chatbots, computemate.ai doesn’t just answer—it gets things done.
-
-## Core Messaging
-
-computemate.ai is an automation-first AI agent that takes your goals, creates a structured plan, and executes it by orchestrating multiple tools. It goes beyond conversation—delivering real results.
-
-### Value Propositions
-
-*   **Execute**: Automatically carry out tasks from start to finish.
-*   **Orchestrate**: Seamlessly coordinate multiple tools and APIs.
-*   **Automate**: Save time and effort by letting computemate.ai handle complex workflows.
 
 ### Key Differentiators
 
@@ -102,6 +94,16 @@ pip install --upgrade "computemate[genai]"
 
 Run commands either `computemate` or `cpm`.
 
+> computemate
+
+or
+
+> cpm
+
+After `ComputeMate AI` is launched, enter your request in the ComputeMate AI prompt.
+
+Remarks: `ComputeMate AI` allows you to execute system commands directly. Simply prefix your commands with `!` or `!!`. Use `!` to include the command output in the ongoing conversation, and `!!` when you prefer not to display the output.
+
 ### CLI Options
 
 > computemate -h
@@ -132,11 +134,37 @@ You may override the default AI backend temporarily by using the CLI option `-b`
 
 > computemate -b groq
 
+Read AI backend setup examples at https://github.com/eliranwong/computemate/tree/main/docs/setup_ai_backends
+
 ## Configure MCP Servers
 
 Enter `.mcp` in ComputeMate AI prompt.
 
-<img width="1732" height="1258" alt="Image" src="https://github.com/user-attachments/assets/40b7aafa-7fac-4613-b769-c417da045d0e" />
+Three MCP servers are available in the following example, you can add more to meet your needs.
+
+```
+{
+    # Check configuration format at https://gofastmcp.com/clients/client#configuration-format
+    #
+    # Example - Online Search Utilities; Perplexica setup is required; read https://github.com/eliranwong/computemate/blob/main/docs/setup_others/online_searches.md
+    # Uncomment the following line to use it, i.e. remove the `#` symbol
+    "online": {"command": "python", "args": [os.path.join(COMPUTEMATE_PACKAGE_PATH, "mcp", "online_searches.py")]},
+    #
+    # Example - Youtube Utilities; Installation of `ffmpeg` is required; read https://github.com/eliranwong/computemate/blob/main/docs/setup_others/ffmpeg.md
+    # Uncomment the following line to use it, i.e. remove the `#` symbol
+    "youtube": {"command": "python", "args": [os.path.join(COMPUTEMATE_PACKAGE_PATH, "mcp", "youtube.py")]},
+    #
+    # Example - GitHub MCP
+    # Export your GITHUB_TOKEN, e.g. `export GITHUB_TOKEN=xxxxxxxxxxxxxx`
+    # Uncomment the following 4 lines to use it
+    "github": {
+        "url": "https://api.githubcopilot.com/mcp",
+        "headers": {"Authorization": os.getenv("GITHUB_TOKEN")},
+    },
+}
+```
+
+Some MCP servers in the example require extra setup, read https://github.com/eliranwong/computemate/tree/main/docs/setup_others
 
 ## Configure Available Tools
 

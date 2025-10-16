@@ -346,15 +346,21 @@ async def main_async():
                 user_request = select if select else ""
             elif user_request.startswith("!"):
                 pre_cwd = os.getcwd()
-                cmd = user_request[1:].strip()
+                if user_request.startswith("!!"):
+                    record_cmd = False
+                    cmd = user_request[2:].strip()
+                else:
+                    record_cmd = True
+                    cmd = user_request[1:].strip()
                 if not cmd:
                     cmd = "cd" if USER_OS == "Windows" else "pwd"
                 cmd_output, cwd = run_system_command(cmd)
                 display_info(console, Markdown(f"```\n{cmd_output}\n```"))
-                messages += [
-                    {"role": "user", "content": f"Run system command:\n\n```\n{cmd}\n```"},
-                    {"role": "assistant", "content": f"```output\n{cmd_output}\n```"},
-                ]
+                if record_cmd:
+                    messages += [
+                        {"role": "user", "content": f"Run system command:\n\n```\n{cmd}\n```"},
+                        {"role": "assistant", "content": f"```output\n{cmd_output}\n```"},
+                    ]
                 if (not pre_cwd == cwd) and os.path.isdir(cwd):
                     os.chdir(cwd)
                     display_info(console, list_dir_content(cwd), title=cwd)
