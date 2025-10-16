@@ -1,4 +1,4 @@
-agentmake>=1.1.27
+agentmake>=1.1.29
 agentmakemcp>=0.0.8
 fastmcp[cli]
 rich

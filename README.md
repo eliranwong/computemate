@@ -22,6 +22,26 @@ For professionals, teams, and innovators who need more than just chat-based AI, 
 *   **Versatile** – supports 16 AI backends and numerous models, leveraging the advantages of AgentMake AI.
 *   **Extensible** – capable of extending functionalities by interacting with Additional AgentMake AI tools or third-party MCP (Modal Context Protocol) servers.
 
+### Comparison - ToolMate AI vs ComputeMate AI
+
+| Feature                     | ToolMate AI | ComputeMate AI |
+|-----------------------------|-------------|----------------|
+| AgentMake Tool Support      | Yes         | Yes            |
+| AgentMake Agent Support     | No          | Yes            |
+| AgentMake MCP Server Support| No          | Yes            |
+| 3rd-Party MCP Server Support| No          | Yes            |
+| Partner Mode                | Yes         | Yes            |
+| Partner Mode                | No          | Yes            |
+| Chat Mode                   | No          | Yes            |
+| Auto Tool Selection         | Yes         | Yes            |
+| Manual Tool Selection       | No          | Yes            |
+| Save Master Plans           | No          | Yes            |
+| Save Prompts                | No          | Yes            |
+| Full UI Development         | No          | Yes            |
+| Built-in Text Editor        | No          | Yes            |
+| Stdin Support               | No          | Yes            |
+| IDE Integration             | No          | Yes            |
+
 ## ComputeMate AI Agentic Workflow
 
 1.  **ComputeMate AI** receives a request from a user.

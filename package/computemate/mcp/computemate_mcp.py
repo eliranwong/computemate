@@ -1,9 +1,9 @@
-import logging, json, os, pydoc
+import logging, json, os, pydoc, shutil, re
 from fastmcp.server.auth.providers.jwt import StaticTokenVerifier
 from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp import FastMCP
 from fastmcp.prompts.prompt import PromptMessage, TextContent
-from agentmake import agentmake, DEVELOPER_MODE, readTextFile, writeTextFile
+from agentmake import agentmake, DEVELOPER_MODE, readTextFile, writeTextFile, extractText
 from agentmake.utils.system import getDeviceInfo
 from computemate import COMPUTEMATE_VERSION, COMPUTEMATE_PACKAGE_PATH, COMPUTEMATEDATA, AGENTMAKE_CONFIG, config, list_dir_content
 from typing import List, Dict, Any, Union
@@ -35,6 +35,27 @@ mcp = FastMCP(name="ComputeMate AI", auth=verifier)
 
 def getResponse(messages:list) -> str:
     return messages[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+
+def export_text_to_docx_file(docx_file_path:str, text_content:str) -> str:
+    if not shutil.which("pandoc"):
+        print("Required tool 'pandoc' is not found on your system! Read https://pandoc.org/installing.html for installation.")
+        return ""
+    if not docx_file_path.endswith(".docx"):
+        docx_file_path = f"{docx_file_path}.docx"
+    pydoc.pipepager(text_content, cmd=f'''pandoc -f markdown -t docx -o "{docx_file_path}"''')
+    return f"File saved: {docx_file_path}"
+
+def export_text_to_pdf_file(pdf_file_path:str, text_content:str) -> str:
+    if not shutil.which("pandoc"):
+        print("Required tool 'pandoc' is not found on your system! Read https://pandoc.org/installing.html for installation.")
+        return ""
+    elif not shutil.which("pdflatex"):
+        print("Required tool 'pdflatex' is not found on your system! Read https://pandoc.org/installing.html for installation.")
+        return ""
+    if not pdf_file_path.endswith(".pdf"):
+        pdf_file_path = f"{pdf_file_path}.pdf"
+    pydoc.pipepager(text_content, cmd=f'''pandoc -f markdown -t pdf -o "{pdf_file_path}"''')
+    return f"File saved: {pdf_file_path}"
 
 @mcp.resource("resource://info")
 def info() -> str:
@@ -141,8 +162,8 @@ Args [required]:
     return f"File saved: {text_file_path}"
 
 @mcp.tool
-def extract_file_text_into_markdown(request:str) -> str:
-    """Extract the text content from a file or a webpage, and convert it into markdown format; a filepath or an URL is required.
+def extract_file_text(request:str) -> str:
+    """Extract the text from a non-plain text file or from a webpage and convert it into Markdown format; a file path or URL is required.
 
 Args [required]:
     filepath_or_url: Either a file path or an url. Return an empty string '' if not given.
@@ -153,38 +174,47 @@ Args [required]:
 
 @mcp.tool
 def write_pdf_file(pdf_file_path:str, markdown_content:str) -> str:
-    """Write markdown text content into a pdf file; text in markdown format and a file path are required
+    """Write markdown text string into a pdf file; text in markdown format and a file path are required
 
 Args [required]:
     pdf_file_path: the file path of the pdf file to be written
     markdown_content: the markdown text content to be written into the file
 """
-    if not shutil.which("pandoc"):
-        print("Required tool 'pandoc' is not found on your system! Read https://pandoc.org/installing.html for installation.")
-        return ""
-    elif not shutil.which("pdflatex"):
-        print("Required tool 'pdflatex' is not found on your system! Read https://pandoc.org/installing.html for installation.")
-        return ""
-    if not pdf_file_path.endswith(".pdf"):
-        pdf_file_path = f"{pdf_file_path}.pdf"
-    pydoc.pipepager(text_field.text, cmd=f'''pandoc -f markdown -t pdf -o "{pdf_file_path}"''')
-    return f"File saved: {pdf_file_path}"
+    return export_text_to_pdf_file(pdf_file_path, markdown_content)
 
 @mcp.tool
 def write_docx_file(docx_file_path:str, markdown_content:str) -> str:
-    """Write markdown text content into a word document docx file; text in markdown format and a file path are required
+    """Write markdown text string into a word document docx file; text in markdown format and a file path are required
 
 Args [required]:
     docx_file_path: the file path of the word document docx file to be written
     markdown_content: the markdown text content to be written into the file
 """
-    if not shutil.which("pandoc"):
-        print("Required tool 'pandoc' is not found on your system! Read https://pandoc.org/installing.html for installation.")
-        return ""
-    if not docx_file_path.endswith(".docx"):
-        docx_file_path = f"{docx_file_path}.docx"
-    pydoc.pipepager(text_field.text, cmd=f'''pandoc -f markdown -t docx -o "{docx_file_path}"''')
-    return f"File saved: {docx_file_path}"
+    return export_text_to_docx_file(docx_file_path, markdown_content)
+
+@mcp.tool
+def convert_file_to_pdf_format(input_file_path:str) -> str:
+    """Convert a given file into a pdf file format; a file path is required
+
+Args [required]:
+    input_file_path: the file path of the input file to be converted
+"""
+    markdown_content = readTextFile(input_file_path) if re.search(r"\.(txt|md|markdown)$", input_file_path.lower()) else extractText(input_file_path)
+    input_file_path = re.sub(r"\.[a-z]+?$", "", input_file_path)
+    pdf_file_path = input_file_path+".pdf"
+    return export_text_to_pdf_file(pdf_file_path, markdown_content)
+
+@mcp.tool
+def convert_file_to_docx_format(input_file_path:str) -> str:
+    """Convert a given file into a docx word document format; a file path is required
+
+Args [required]:
+    input_file_path: the file path of the input file to be converted
+"""
+    markdown_content = readTextFile(input_file_path) if re.search(r"\.(txt|md|markdown)$", input_file_path.lower()) else extractText(input_file_path)
+    input_file_path = re.sub(r"\.[a-z]+?$", "", input_file_path)
+    docx_file_path = input_file_path+".docx"
+    return export_text_to_docx_file(docx_file_path, markdown_content)
 
 @mcp.tool
 def ask_files(request:str) -> str:

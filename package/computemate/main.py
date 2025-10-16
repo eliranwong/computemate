@@ -368,14 +368,6 @@ async def main_async():
                     os.chdir(cwd)
                     display_info(console, list_dir_content(cwd), title=cwd)
                 continue
-            elif re.search(r"\?\?(.*?)\?\? ", user_request+" "):
-                fileList = [os.path.abspath(i) for i in re.findall(r"\?\?(.*?)\?\? ", user_request+" ")]
-                new_user_request = re.sub(r"\?\?(.*?)\?\? ", "", user_request+" ").strip()
-                new_user_request = f'''# File List\n\n{fileList}\n\n# User Request\n\n{new_user_request}'''
-                if config.agent_mode is None and not user_request.startswith("@"):
-                    user_request = ("@computemate_ask_files " if len(config_mcp) > 1 else "@ask_files ") + "\n\n" + new_user_request
-                else:
-                    user_request = new_user_request
             if user_request == ".ideas":
                 # Generate ideas for `prompts to try`
                 ideas = ""
@@ -818,6 +810,19 @@ Viist https://github.com/eliranwong/computemate
             # auto tool selection in chat mode
             if config.agent_mode is None and config.auto_tool_selection and not user_request.startswith("@"):
                 user_request = f"@ {user_request}"
+            elif re.search(r"\?\?(.*?)\?\? ", user_request+" "):
+                if found_tool := re.search("^(@[^ ]*? )", user_request):
+                    file_tool = found_tool.group(1)
+                    user_request = user_request[len(file_tool):]
+                else:
+                    file_tool = ""
+                fileList = [os.path.abspath(i) for i in re.findall(r"\?\?(.*?)\?\? ", user_request+" ")]
+                new_user_request = re.sub(r"\?\?(.*?)\?\? ", "", user_request+" ").strip()
+                new_user_request = f'''# File List\n\n{fileList}\n\n# User Request\n\n{new_user_request}'''
+                if config.agent_mode is None and not file_tool:
+                    user_request = ("@computemate_ask_files " if len(config_mcp) > 1 else "@ask_files ") + "\n\n" + new_user_request
+                else:
+                    user_request = f"{file_tool}\n{new_user_request}"
             
             if user_request.startswith("@ "):
                 user_request = user_request[2:].strip()
@@ -916,6 +921,7 @@ Viist https://github.com/eliranwong/computemate
                         if tool in ("computemate_execute_task", "execute_task"):
                             tool_instruction = "# Instruction\n\n"+tool_instruction+"\n\n# Supplementary Device Information\n\n"+getDeviceInfo()
                             tool_result = agentmake(tool_instruction, **{'tool': 'magic' if config.auto_code_correction else 'execute_task'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                            #tool_result = agentmake(tool_instruction, **{'tool': 'execute_task'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         elif tool in ("computemate_email_outlook", "email_outlook", "computemate_email_gmail", "email_gmail"):
                             tool_result = agentmake(tool_instruction, **{'tool': 'email/outlook' if 'outlook' in tool else 'email/gmail'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         elif tool in ("computemate_calendar_outlook", "calendar_outlook", "computemate_calendar_google", "calendar_google"):
