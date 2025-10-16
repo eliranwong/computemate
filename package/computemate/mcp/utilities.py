@@ -15,6 +15,17 @@ mcp = FastMCP(name="ComputeMate Utilities")
 def getResponse(messages:list) -> str:
     return messages[-1].get("content") if messages and "content" in messages[-1] else "Error!"
 
+# media files
+
+@mcp.tool
+def process_media_files(request:str) -> str:
+    """Process / edit / convert media files, such as videos or audio; specify how you want to process the file(s); requires file path(s) for the file(s) to be processed."""
+    global agentmake, getResponse
+    messages = agentmake(request, **{'tool': 'process_media_files'}, **AGENTMAKE_CONFIG)
+    return getResponse(messages)
+
+# youtube
+
 @mcp.tool
 def youtube_download_mp4_video(request:str) -> str:
     """Download Youtube audio into mp4 video file; a valid Youtube URL is required
