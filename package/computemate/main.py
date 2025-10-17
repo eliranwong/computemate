@@ -234,8 +234,9 @@ async def main_async():
     async with client:
 
         console = Console(record=True)
-        console.clear()
-        console.print(get_banner(COMPUTEMATE_VERSION))
+        if not (args.default and args.exit):
+            console.clear()
+            console.print(get_banner(COMPUTEMATE_VERSION))
 
         tools, tools_schema, master_available_tools, available_tools, tool_descriptions, prompts, prompts_schema, resources, templates = await initialize_app(client)
         # format input suggestions
@@ -922,6 +923,10 @@ Viist https://github.com/eliranwong/computemate
                             tool_instruction = "# Instruction\n\n"+tool_instruction+"\n\n# Supplementary Device Information\n\n"+getDeviceInfo()
                             tool_result = agentmake(tool_instruction, **{'tool': 'magic' if config.auto_code_correction else 'execute_task'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                             #tool_result = agentmake(tool_instruction, **{'tool': 'execute_task'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                        elif tool in ("online_search_finance", "search_finance"):
+                            tool_result = agentmake(tool_instruction, **{'tool': 'search/finance'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                        elif tool in ("utilities_create_statistical_graph", "create_statistical_graph"):
+                            tool_result = agentmake(tool_instruction, **{'tool': 'create/statistical_graph'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         elif tool in ("computemate_email_outlook", "email_outlook", "computemate_email_gmail", "email_gmail"):
                             tool_result = agentmake(tool_instruction, **{'tool': 'email/outlook' if 'outlook' in tool else 'email/gmail'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         elif tool in ("computemate_calendar_outlook", "calendar_outlook", "computemate_calendar_google", "calendar_google"):

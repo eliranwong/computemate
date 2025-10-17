@@ -19,9 +19,14 @@ def getResponse(messages:list) -> str:
 
 @mcp.tool
 def process_media_files(request:str) -> str:
-    """Process / edit / convert media files, such as videos or audio; specify how you want to process the file(s); requires file path(s) for the file(s) to be processed."""
+    """Process, edit, or convert media files—such as videos or audio—that can be handled using the `ffmpeg` command; specify how you want to process the file(s); requires file path(s) for the file(s) to be processed.
+
+Args [required]:
+    code: Generate Python code that executes an `ffmpeg` command to process media files, such as videos or audio, based on the specifications in my request.
+    title: Title for the task
+"""
     global agentmake, getResponse
-    messages = agentmake(request, **{'tool': 'process_media_files'}, **AGENTMAKE_CONFIG)
+    messages = agentmake(request, **{'tool': 'cli/ffmpeg'}, **AGENTMAKE_CONFIG)
     return getResponse(messages)
 
 # youtube
@@ -101,10 +106,8 @@ def create_statistical_graph(request:str) -> str:
     """Create statistical plots, such as pie charts / bar charts / line charts / scatter plots / heatmaps / histograms / boxplots / violin plots / radar charts / polar charts / contour plots / density plots / 3D plots, to visualize statistical data; instruction and data are required
 
 Args [required]:
-    code: Generate python code that integrates package matplotlib to resolve my input. Save the result in png format. Tell me the saved image path at the end of your response.
+    code: Generate python code that integrates library `matplotlib` to resolve my input. Save the result in png format. Tell me the saved image path at the end of your response.
 """
-    global agentmake, getResponse
-    messages = agentmake(request, **{'tool': 'create/statistical_graph'}, **AGENTMAKE_CONFIG)
-    return getResponse(messages)
+    return ""
 
 mcp.run(show_banner=False)

@@ -1,12 +1,11 @@
 from computemate import config, DIALOGS, AGENTMAKE_CONFIG, COMPUTEMATE_USER_DIR
 from prompt_toolkit.input import create_input
 from prompt_toolkit.layout import Layout, HSplit
-from prompt_toolkit.widgets import Frame, Label
 from prompt_toolkit.styles import Style, merge_styles
 from prompt_toolkit.application import Application
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.completion import WordCompleter, FuzzyCompleter
-from prompt_toolkit.widgets import Frame, TextArea
+from prompt_toolkit.widgets import Frame, TextArea, Label
 from prompt_toolkit.layout.menus import CompletionsMenu
 from prompt_toolkit.layout import WindowAlign
 from prompt_toolkit.lexers import PygmentsLexer
@@ -33,7 +32,7 @@ async def getTextArea(input_suggestions:list=None, default_entry="", title="", m
     pygments_style = get_style_by_name('github-dark')
     markdown_style = style_from_pygments_cls(pygments_style)
     # Define custom style
-    custom_style = Style.from_dict({
+    frame_style = {
         #'frame.border': '#00ff00',  # Green border
         #'frame.label': '#ffaa00 bold',  # Orange label
         #'completion-menu': 'bg:#008888 #ffffff',
@@ -41,8 +40,10 @@ async def getTextArea(input_suggestions:list=None, default_entry="", title="", m
         #'completion-menu.completion.current': 'bg:#00aaaa #000000',
         #"status": "reverse",
         "textarea": "bg:#1E1E1E",
-    })
-
+    }
+    if config.agent_mode is not None:
+        frame_style["frame.border"] = "#FF8800" if config.agent_mode else "#8000AA"
+    custom_style = Style.from_dict(frame_style)
     style = merge_styles([markdown_style, custom_style])
 
     # TextArea with a completer

@@ -217,6 +217,18 @@ Args [required]:
     return export_text_to_docx_file(docx_file_path, markdown_content)
 
 @mcp.tool
+def convert_files(request:str) -> str:
+    """Convert files that can be handled using the `pandoc` command; specify the file path(s) and how you want to convert them
+
+Args [required]:
+    code: Generate Python code that executes an `pandoc` command to convert files, such as videos or audio, based on the specifications in my request.
+    title: Title for the task
+"""
+    global agentmake, getResponse
+    messages = agentmake(request, **{'tool': 'cli/pandoc'}, **AGENTMAKE_CONFIG)
+    return getResponse(messages)
+
+@mcp.tool
 def ask_files(request:str) -> str:
     """ask questions about files content; a file list is required
 

@@ -22,6 +22,15 @@ def conduct_research(request:str) -> str:
     return getResponse(messages)
 
 @mcp.tool
+def search_finance(request:str) -> str:
+    """Search or analyze online financial data that can be handled using the python library `yfinance`
+
+Args [required]:
+    code: Generate python code that integrates library `yfinance` to resolve my request. Integrate libraries, such as `matplotlib`, to visualize data, if applicable.
+"""
+    return ""
+
+@mcp.tool
 def search_news(request:str) -> str:
     """Perform online searches for up-to-date and real-time news information; keyword(s) for searching are required
 
