@@ -169,12 +169,12 @@ Get a static text-based response directly from a text-based AI model without usi
     
     return tools, tools_schema, master_available_tools, available_tools, tool_descriptions, prompts, prompts_schema, resources, templates
 
-def display_info(console, info, title=None):
+def display_info(console, info, title=None, border_style=config.color_info_border):
     """ Info panel with background """
     info_panel = Panel(
         Text(info, style="bold white on grey11", justify="center") if isinstance(info, str) else info,
         title=title,
-        border_style="bright_blue",
+        border_style=border_style,
         box=box.ROUNDED,
         style="on grey11" if isinstance(info, str) else "",
         #padding=(1 if isinstance(info, str) else 0, 1) # (0, 1) by default
@@ -966,18 +966,21 @@ Viist https://github.com/eliranwong/computemate
 
             # user specify a single tool
             if specified_tool and not specified_tool == "@@" and not specified_prompt:
+                display_info(console,Markdown(messages[-1]['content']), border_style="none")
                 await process_tool(specified_tool, user_request)
-                console.print(Markdown(f"# User Request\n\n{messages[-2]['content']}\n\n# AI Response\n\n{messages[-1]['content']}"))
+                console.print(Markdown(messages[-1]['content']))
                 console.print()
+                config.backup_required = True
                 continue
 
             # Chat mode
             if config.agent_mode is None and not specified_tool == "@@" and not specified_prompt:
+                display_info(console,Markdown(messages[-1]['content']), border_style="none")
                 async def run_chat_mode():
                     nonlocal messages, user_request
                     messages = agentmake(messages if messages else user_request, system="auto", **AGENTMAKE_CONFIG)
                 await thinking(run_chat_mode, "Processing your request ...")
-                console.print(Markdown(f"# User Request\n\n{messages[-2]['content']}\n\n# AI Response\n\n{messages[-1]['content']}"))
+                console.print(Markdown(messages[-1]['content']))
                 # temporaily save after each step
                 backup_conversation(messages, "")
                 config.backup_required = True

@@ -136,11 +136,17 @@ You can select between three AI modes to suit your preferences:
 *   **Agent mode** – A fully autonomous agent designed to plan, orchestrate tools, and take multiple actions to address user requests.
 *   **Partner mode** – A semi-automated mode that involves you in the process with review and edit prompts, giving you more control over the AI's actions.
 
-`Partner mode` is set as the default on fresh installation.
+`Chat mode` is set as the default on fresh installation.
 
 To switch between modes, use the `.mode` command in the ComputeMate AI prompt. This will open a selection dialog where you can choose your preferred mode.
 
 <img width="1732" height="1258" alt="Image" src="https://github.com/user-attachments/assets/d5aca1b6-1a06-4eeb-b93d-0b1387a9932e" />
+
+To help users stay aware of the current AI mode, the input border color changes when switching between modes.
+
+<img width="1732" height="1258" alt="Image" src="https://github.com/user-attachments/assets/0b765955-02e5-4eee-95ca-8cdc5216dd1a" />
+
+You can customize the border colors of agent and partner modes in `config.py`, by changing the values of `color_agent_mode` and `color_partner_mode`.
 
 ## ⚙️ Configure AI Backend
 

@@ -42,7 +42,7 @@ async def getTextArea(input_suggestions:list=None, default_entry="", title="", m
         "textarea": "bg:#1E1E1E",
     }
     if config.agent_mode is not None:
-        frame_style["frame.border"] = "#FF8800" if config.agent_mode else "#8000AA"
+        frame_style["frame.border"] = config.color_agent_mode if config.agent_mode else config.color_partner_mode
     custom_style = Style.from_dict(frame_style)
     style = merge_styles([markdown_style, custom_style])
 
