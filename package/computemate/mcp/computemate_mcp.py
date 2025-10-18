@@ -2,11 +2,9 @@ import logging, json, os, pydoc, shutil, re
 from fastmcp.server.auth.providers.jwt import StaticTokenVerifier
 from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp import FastMCP
-from fastmcp.prompts.prompt import PromptMessage, TextContent
-from agentmake import agentmake, DEVELOPER_MODE, readTextFile, writeTextFile, extractText
+from agentmake import agentmake, readTextFile, writeTextFile, extractText
 from agentmake.utils.system import getDeviceInfo
-from computemate import COMPUTEMATE_VERSION, COMPUTEMATE_PACKAGE_PATH, COMPUTEMATEDATA, AGENTMAKE_CONFIG, config, list_dir_content
-from typing import List, Dict, Any, Union
+from computemate import COMPUTEMATE_VERSION, AGENTMAKE_CONFIG, config, list_dir_content
 
 # configure backend
 AGENTMAKE_CONFIG["backend"] = config.backend
@@ -62,6 +60,7 @@ def info() -> str:
     """Show ComputeMate AI information"""
     info = "ComputeMate AI " + COMPUTEMATE_VERSION
     info += "\n\nSource: https://github.com/eliranwong/computemate\n\nDeveloper: Eliran Wong"
+    info += f"\n\nAI Backend: {AGENTMAKE_CONFIG["backend"]}"
     return info
 
 @mcp.resource("resource://device")

@@ -502,9 +502,17 @@ async def main_async():
                     console.print(get_banner(COMPUTEMATE_VERSION))
                     if messages:
                         for i in messages:
-                            if i.get("role", "") in ("user", "assistant"):
-                                console.rule()
-                                console.print(Markdown(f"# {i['role']}\n\n{i['content']}"))
+                            if i.get("role", "") == "user":
+                                if config.agent_mode:
+                                    border_style = config.color_agent_mode
+                                elif config.agent_mode is not None:
+                                    border_style = config.color_partner_mode
+                                else:
+                                    border_style = "none"
+                                display_info(console,Markdown(i['content'].strip()), border_style=border_style)
+                            elif i.get("role", "") == "assistant":
+                                console.print(Markdown(i['content'].strip()))
+                                console.print()
                     if os.path.isfile(load_path) or config.agent_mode is None:
                         # next user request
                         os.chdir(cwd)
@@ -966,8 +974,15 @@ Viist https://github.com/eliranwong/computemate
 
             # user specify a single tool
             if specified_tool and not specified_tool == "@@" and not specified_prompt:
-                display_info(console,Markdown(messages[-1]['content']), border_style="none")
+                if config.agent_mode:
+                    border_style = config.color_agent_mode
+                elif config.agent_mode is not None:
+                    border_style = config.color_partner_mode
+                else:
+                    border_style = "none"
+                display_info(console,Markdown(messages[-1]['content']), border_style=border_style)
                 await process_tool(specified_tool, user_request)
+                print()
                 console.print(Markdown(messages[-1]['content']))
                 console.print()
                 config.backup_required = True
@@ -980,6 +995,7 @@ Viist https://github.com/eliranwong/computemate
                     nonlocal messages, user_request
                     messages = agentmake(messages if messages else user_request, system="auto", **AGENTMAKE_CONFIG)
                 await thinking(run_chat_mode, "Processing your request ...")
+                print()
                 console.print(Markdown(messages[-1]['content']))
                 # temporaily save after each step
                 backup_conversation(messages, "")
