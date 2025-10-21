@@ -11,6 +11,9 @@ logging.basicConfig(format="[%(levelname)s]: %(message)s", level=logging.ERROR)
 
 mcp = FastMCP(name="Online Search Utilities")
 
+# OpenWeatherMap API key
+OPENWEATHERMAP_API_KEY = os.getenv("OPENWEATHERMAP_API_KEY").split(",") if os.getenv("OPENWEATHERMAP_API_KEY") else [""]
+
 def getResponse(messages:list) -> str:
     return messages[-1].get("content") if messages and "content" in messages[-1] else "Error!"
 
@@ -29,6 +32,17 @@ Args [required]:
     code: Generate python code that integrates library `yfinance` to resolve my request. Integrate libraries, such as `matplotlib`, to visualize data, if applicable.
 """
     return ""
+
+@mcp.tool
+def search_weather(request:str) -> str:
+    f"""Answer a query about weather; a weather-related query is required.
+
+Args [required]:
+    code: Generate python code that use my OpenWeatherMap API key '{OPENWEATHERMAP_API_KEY[0]}' to answer my query about weather. Use Celsius as the unit for temperature.
+"""
+    global agentmake, getResponse
+    messages = agentmake(request, **{'input_content_plugin': 'convert_relative_datetime', 'tool': 'qna/weather'}, **AGENTMAKE_CONFIG)
+    return getResponse(messages)
 
 @mcp.tool
 def search_news(request:str) -> str:

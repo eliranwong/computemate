@@ -34,6 +34,17 @@ mcp = FastMCP(name="ComputeMate AI", auth=verifier)
 def getResponse(messages:list) -> str:
     return messages[-1].get("content") if messages and "content" in messages[-1] else "Error!"
 
+@mcp.tool
+def answer_time_query(request:str) -> str:
+    f"""Answer a query about time; a time-related query is required.
+
+Args [required]:
+    code: Generate Python code that integrates libraries `pendulum` or `pytz` to answer my query about time.
+"""
+    global agentmake, getResponse
+    messages = agentmake(request, **{'input_content_plugin': 'convert_relative_datetime', 'tool': 'qna/time'}, **AGENTMAKE_CONFIG)
+    return getResponse(messages)
+
 def export_text_to_docx_file(docx_file_path:str, text_content:str) -> str:
     if not shutil.which("pandoc"):
         print("Required tool 'pandoc' is not found on your system! Read https://pandoc.org/installing.html for installation.")

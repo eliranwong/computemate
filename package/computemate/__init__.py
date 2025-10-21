@@ -29,6 +29,7 @@ default_config = '''banner_title=""
 *color_info_border="bright_blue"
 *embedding_model="paraphrase-multilingual"
 *custom_input_suggestions=[]
+*device_info_tools=[]
 *disabled_tools=[]'''
 
 if readTextFile(CONFIG_FILE).strip() == "":
@@ -64,6 +65,7 @@ color_partner_mode="{config.color_partner_mode}"
 color_info_border="{config.color_info_border}"
 embedding_model="{config.embedding_model}"
 custom_input_suggestions={pprint.pformat(config.custom_input_suggestions)}
+device_info_tools={pprint.pformat(config.device_info_tools)}
 disabled_tools={pprint.pformat(config.disabled_tools)}"""
     writeTextFile(CONFIG_FILE_BACKUP if backup else CONFIG_FILE, configurations)
 
@@ -79,6 +81,7 @@ if just_upgraded:
 
 # temporary config
 config.current_prompt = ""
+config.cancelled = False
 config.backup_required = False
 config.export_item = ""
 config.action_list = {
