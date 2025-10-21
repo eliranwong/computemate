@@ -1027,20 +1027,20 @@ Press `Ctrl+C` once or twice until the loading is cancelled, while you are waiti
                         elif tool in ("computemate_calendar_outlook", "calendar_outlook", "computemate_calendar_google", "calendar_google"):
                             tool_result = agentmake(tool_instruction, **{'input_content_plugin': 'convert_relative_datetime', 'tool': 'calendar/outlook' if 'outlook' in tool else 'calendar/google'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         elif tool in ("computemate_teamwork", "teamwork"):
-                            this_AGENTMAKE_CONFIG = deepcopy(AGENTMAKE_CONFIG)
-                            this_AGENTMAKE_CONFIG["print_on_terminal"] = True
-                            this_AGENTMAKE_CONFIG["word_wrap"] = True
-                            tool_result = agentmake(request_dict, **{'agent': 'teamwork'}, **this_AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                            #this_AGENTMAKE_CONFIG = deepcopy(AGENTMAKE_CONFIG)
+                            #this_AGENTMAKE_CONFIG["print_on_terminal"] = True
+                            #this_AGENTMAKE_CONFIG["word_wrap"] = True
+                            tool_result = agentmake(request_dict, **{'agent': 'teamwork'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         elif tool in ("computemate_reflection_agent", "reflection_agent"):
-                            this_AGENTMAKE_CONFIG = deepcopy(AGENTMAKE_CONFIG)
-                            this_AGENTMAKE_CONFIG["print_on_terminal"] = True
-                            this_AGENTMAKE_CONFIG["word_wrap"] = True
-                            tool_result = agentmake(request_dict, **{'agent': 'deep_reflection'}, **this_AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                            #this_AGENTMAKE_CONFIG = deepcopy(AGENTMAKE_CONFIG)
+                            #this_AGENTMAKE_CONFIG["print_on_terminal"] = True
+                            #this_AGENTMAKE_CONFIG["word_wrap"] = True
+                            tool_result = agentmake(request_dict, **{'agent': 'deep_reflection'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         elif tool in ("computemate_reasoning_agent", "reasoning_agent"):
-                            this_AGENTMAKE_CONFIG = deepcopy(AGENTMAKE_CONFIG)
-                            this_AGENTMAKE_CONFIG["print_on_terminal"] = True
-                            this_AGENTMAKE_CONFIG["word_wrap"] = True
-                            tool_result = agentmake(request_dict, **{'agent': 'reasoning'}, **this_AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                            #this_AGENTMAKE_CONFIG = deepcopy(AGENTMAKE_CONFIG)
+                            #this_AGENTMAKE_CONFIG["print_on_terminal"] = True
+                            #this_AGENTMAKE_CONFIG["word_wrap"] = True
+                            tool_result = agentmake(request_dict, **{'agent': 'reasoning'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         else:
                             if len(tool_properties) == 1 and "request" in tool_properties: # AgentMake MCP Servers or alike
                                 if "items" in tool_properties["request"]: # requires a dictionary instead of a string
