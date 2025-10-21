@@ -353,19 +353,30 @@ async def main_async():
             else:
                 user_request = await getTextArea(input_suggestions=input_suggestions)
                 master_plan = ""
-            # open a text file as a prompt
-            check_path = isExistingPath(user_request)
-            if check_path and os.path.isfile(check_path) and not user_request == ".":
-                try:
-                    config.current_prompt = extractText(check_path)
-                except:
-                    try:
-                        config.current_prompt = readTextFile(check_path)
-                    except:
-                        info = f"File `{check_path}` not readable!"
-                        display_info(console, info, title="Error!")
-                        config.current_prompt = check_path
+            # open a text file as a prompt or change directory
+            if user_request == "..":
+                check_path = os.path.dirname(os.getcwd())
+                os.chdir(check_path)
+                display_info(console, list_dir_content(check_path), title=check_path)
                 continue
+            check_path = isExistingPath(user_request)
+            if check_path and not user_request == ".":
+                if os.path.isfile(check_path):
+                    try:
+                        config.current_prompt = extractText(check_path)
+                    except:
+                        try:
+                            config.current_prompt = readTextFile(check_path)
+                        except:
+                            info = f"File `{check_path}` not readable!"
+                            display_info(console, info, title="Error!")
+                            config.current_prompt = check_path
+                    continue
+                elif os.path.isdir(check_path):
+                    check_path = os.path.abspath(check_path)
+                    os.chdir(check_path)
+                    display_info(console, list_dir_content(check_path), title=check_path)
+                    continue
             # luanch action menu
             if not user_request:
                 continue

@@ -237,11 +237,17 @@ Select / deselect to enable / disable tools.
 
 * Use `.lite` to enable or disable lite context. When lite context is enabled, ComputeMate runs faster, with a slight trade‑off in tool response quality.
 * To use `.import`, you need to specify a python file that contains a saved conversation.  Conversation is saved into a file each time when a backup is executed. Check the message `Conversation backup saved to ...` or locate the backups in `~/agentmake/xomate`. Instead of loading a mere conversation, you can load both a conversation and its master plan. To do so, specify a backup directory path that contains both `conversation.py` and `master_plan.md`.
-* To use `.open`, you need to specify a file or a directory that is to be opened.
 * `.edit` command allows you to edit the current conversation with our built-in text editor.  You may customize to use your favorite text editor. Enter `.backend` and change the value of `DEFAULT_TEXT_EDITOR` with a command that calls your favorite text editor.
 * Use `.autosuggest` to toggle auto input suggestions. If disabled, you can use `TAB` key to open input suggestions menu.
 * Use `.reload` to reload the last saved conversation, if any.  It is useful for continuing an unfinished agentic flow after a conversation was broken for any reasons.
 * Command `.matches` works for local MCP connection only.  It doesn't apply to remote MCP connection, as the changes in local settings does not affect the settings in remote servers.
+
+### Additional Special Entries
+
+* Enter `..` to change to parent directory
+* Enter a directory name to change to that directory
+* Enter a file name to import that file text in the Computemate AI prompt
+* Enclose a file name with `??` to include a file for processing, e.g. `??README.md??`
 
 ## ⌨️ Keyboard Shortcuts
 
