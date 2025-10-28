@@ -34,7 +34,7 @@ parser = argparse.ArgumentParser(description = f"""COMPUTEMATE AI {COMPUTEMATE_V
 # global options
 parser.add_argument("default", nargs="*", default=None, help="initial prompt")
 parser.add_argument("-b", "--backend", action="store", dest="backend", help="AI backend; overrides the default backend temporarily.")
-parser.add_argument("-l", "--lite", action="store", dest="lite", choices=["true", "false"], help="Enable / disable lite context. Must be one of: true, false.")
+parser.add_argument("-l", "--light", action="store", dest="light", choices=["true", "false"], help="Enable / disable light context. Must be one of: true, false.")
 parser.add_argument("-m", "--mode", action="store", dest="mode", choices=["agent", "partner", "chat"], help="Specify AI mode. Must be one of: agent, partner, chat.")
 parser.add_argument("-pe", "--promptengineer", action="store", dest="promptengineer", choices=["true", "false"], help="Enable / disable prompt engineering. Must be one of: true, false.")
 parser.add_argument("-s", "--steps", action="store", dest="steps", type=int, help="Specify the maximum number of steps allowed.")
@@ -72,10 +72,10 @@ Please provide me with the final answer to my original request based on the work
 """
 
 # other temporary config changes
-if args.lite == "true":
-    config.lite = True
-elif args.lite == "false":
-    config.lite = False
+if args.light == "true":
+    config.light = True
+elif args.light == "false":
+    config.light = False
 if args.mode == "agent":
     config.agent_mode = True
 elif args.mode == "partner":
@@ -126,12 +126,16 @@ async def initialize_app(client):
     available_tools = [i for i in available_tools if not i in config.disabled_tools]
 
     tool_descriptions = ""
+    tool_descriptions_lite = ""
     if "get_direct_text_response" not in tools:
-        tool_descriptions = """# TOOL DESCRIPTION: `get_direct_text_response`
+        tool_descriptions = tool_descriptions_lite = """# TOOL DESCRIPTION: `get_direct_text_response`
 Get a static text-based response directly from a text-based AI model without using any other tools. This is useful when you want to provide a simple and direct answer to a question or request, without the need for online latest updates or task execution."""
     for tool_name, tool_description in tools.items():
+        tool_description_lite = tool_description.strip().split("\n")[0]
         tool_descriptions += f"""# TOOL DESCRIPTION: `{tool_name}`
 {tool_description}\n\n\n"""
+        tool_descriptions_lite += f"""# TOOL DESCRIPTION: `{tool_name}`
+{tool_description_lite}\n\n\n"""
 
     prompts_raw = await client.list_prompts()
     prompts = {p.name: p.description for p in prompts_raw}
@@ -167,12 +171,19 @@ Get a static text-based response directly from a text-based AI model without usi
     templates = {r.name: (r.description, r.uriTemplate) for r in templates_raw}
     templates = dict(sorted(templates.items()))
     
-    return tools, tools_schema, master_available_tools, available_tools, tool_descriptions, prompts, prompts_schema, resources, templates
+    return tools, tools_schema, master_available_tools, available_tools, tool_descriptions, tool_descriptions_lite, prompts, prompts_schema, resources, templates
 
-def display_cancel_message(console):
-    console.print(f"[bold {get_border_style()}]Cancelled![/bold {get_border_style()}]\n")
+def display_cancel_message(console, cancel_message="Cancelled!"):
+    console.print(f"[bold {get_border_style()}]{cancel_message}[/bold {get_border_style()}]\n")
     #display_info(console, "Cancelled!", border_style=get_border_style())
     config.cancelled = True
+
+def get_lite_messages(messages, original_request):
+    trimmed_messages = messages[len(DEFAULT_MESSAGES):]
+    lite_messages = [{"role": "user", "content": original_request},{"role": "assistant", "content": "Let's begin."}] if len(trimmed_messages) >= 2 else []
+    if len(trimmed_messages) > 2:
+        lite_messages += trimmed_messages[len(trimmed_messages)-2:]
+    return [{"role": "system", "content": DEFAULT_SYSTEM}]+lite_messages
 
 def display_info(console, info, title=None, border_style=config.color_info_border):
     """ Info panel with background """
@@ -240,8 +251,6 @@ async def main_async():
     client = Client(config_mcp_client)
 
     APP_START = True
-    DEFAULT_SYSTEM = "You are ComputeMate AI, an autonomous agent designed to assist users with using computers."
-    DEFAULT_MESSAGES = [{"role": "system", "content": DEFAULT_SYSTEM}, {"role": "user", "content": "Hello!"}, {"role": "assistant", "content": "Hello! I'm ComputeMate AI, your personal assistant for your computing needs. How can I help you today?"}] # set a tone; it is userful when auto system is used.
 
     async with client:
 
@@ -250,7 +259,7 @@ async def main_async():
             console.clear()
             console.print(get_banner(COMPUTEMATE_VERSION))
 
-        tools, tools_schema, master_available_tools, available_tools, tool_descriptions, prompts, prompts_schema, resources, templates = await initialize_app(client)
+        tools, tools_schema, master_available_tools, available_tools, tool_descriptions, tool_descriptions_lite, prompts, prompts_schema, resources, templates = await initialize_app(client)
         # format input suggestions
         resource_suggestions = []
 
@@ -277,7 +286,7 @@ async def main_async():
                     TextColumn("[progress.description]{task.description}"),
                     transient=True  # This makes the progress bar disappear after the task is done
                 ) as progress:
-                    task_id = progress.add_task(description if description else "Thinking ...", total=None)
+                    task_id = progress.add_task((description if description else "Thinking ...")+" [`Ctrl+C` to cancel]", total=None)
                     async_task = asyncio.create_task(process())
                     try:
                         while not async_task.done():
@@ -293,7 +302,7 @@ async def main_async():
                 """
                 A coroutine that runs a progress bar while awaiting a task.
                 """
-                with alive_bar(title="Processing...", spinner='dots') as bar:
+                with alive_bar(title="Processing ...", spinner='dots') as bar:
                     while not task.done():
                         bar() # Update the bar
                         await asyncio.sleep(0.02) # Yield control back to the event loop
@@ -303,7 +312,9 @@ async def main_async():
                 Manages the async task and the progress bar.
                 """
                 if step_number:
-                    print(f"# Starting Step [{step_number}]...")
+                    print(f"# Starting Step [{step_number}] ... [`Ctrl+C` to cancel]")
+                else:
+                    print(f"# Getting started ... [`Ctrl+C` to cancel]")
                 # Create the async task but don't await it yet.
                 task = asyncio.create_task(run_tool(tool, tool_instruction))
                 # Await the custom async progress bar that awaits the task.
@@ -345,7 +356,7 @@ async def main_async():
             # Original user request
             # note: `python3 -m rich.emoji` for checking emoji
             console.print("Enter your request :smiley: :" if len(messages) == len(DEFAULT_MESSAGES) else "Enter a follow-up request :flexed_biceps: :")
-            input_suggestions = list(config.action_list.keys())+["@ ", "@@ ", "!", "!cd ", "!ai", "!ete", "!etextedit", "!!", "!!ai", "!!ete", "!!etextedit"]+[f"@{t} " for t in available_tools]+[f"{p} " for p in prompt_list]+[f"//{r}" for r in resources.keys()]+template_list+resource_suggestions+sorted(os.listdir("."))+[f"??{i}?? " for i in sorted(os.listdir("."))]+config.custom_input_suggestions
+            input_suggestions = list(config.action_list.keys())+[".editprompt", "@ ", "@@ ", "!", "!cd ", "!ai", "!ete", "!etextedit", "!!", "!!ai", "!!ete", "!!etextedit"]+[f"@{t} " for t in available_tools]+[f"{p} " for p in prompt_list]+["//"]+[f"//{r}" for r in resources.keys()]+template_list+resource_suggestions+sorted(os.listdir("."))+[f"??{i}?? " for i in sorted(os.listdir("."))]+config.custom_input_suggestions
             if args.default:
                 user_request = " ".join(args.default).strip()
                 args.default = None # reset to avoid repeated use
@@ -377,12 +388,15 @@ async def main_async():
                     os.chdir(check_path)
                     display_info(console, list_dir_content(check_path), title=check_path)
                     continue
-            # luanch action menu
+            # process user request
             if not user_request:
                 continue
             elif user_request == ".":
                 select = await DIALOGS.getValidOptions(options=config.action_list.keys(), descriptions=[i.capitalize() for i in config.action_list.values()], title="Action Menu", text="Select an action:")
                 user_request = select if select else ""
+            # shortcuts for task execution
+            elif user_request.startswith(".") and not ((user_request in config.action_list) or user_request.startswith(".open ") or user_request.startswith(".import ")):
+                user_request = ("@computemate_execute_task " if len(config_mcp) > 1 else "@execute_task ") + "\n\n" + fix_string(user_request[1:])
             elif user_request.startswith("!"):
                 pre_cwd = os.getcwd()
                 if user_request.startswith("!!"):
@@ -496,6 +510,8 @@ async def main_async():
                 except Exception as e: # invalid uri
                     print(f"Error: {e}\n")
                     continue
+            elif user_request.startswith("//"):
+                user_request = user_request[2:]
 
             # system command
             if user_request.startswith(".open") or user_request.startswith(".import") or user_request.startswith(".reload"):
@@ -633,11 +649,11 @@ Viist https://github.com/eliranwong/computemate
 - `Ctrl+DOWN`: scroll down
 - `Shift+TAB`: insert four spaces
 - `TAB` or `Ctrl+I`: open input suggestion menu
-- `Esc`: close input suggestion menu
+- `Esc+Esc`: close input suggestion menu
 
-## Cancel Loading an AI response
+## Cancel Running Operations
 
-Press `Ctrl+C` once or twice until the loading is cancelled, while you are waiting for a response."""
+Press `Ctrl+C` once or twice until the running process is cancelled, while you are waiting for a response."""
                     display_info(console, Markdown(help_info), title="Help")
                 elif user_request == ".tools":
                     enabled_tools = await DIALOGS.getMultipleSelection(
@@ -814,10 +830,10 @@ Press `Ctrl+C` once or twice until the loading is cancelled, while you are waiti
                         os.chdir(directory)
                         cwd = os.getcwd()
                         display_info(console, list_dir_content(cwd), title=cwd)
-                elif user_request == ".lite":
-                    config.lite = not config.lite
+                elif user_request == ".light":
+                    config.light = not config.light
                     write_user_config()
-                    info = f"Lite Context `{'Enabled' if config.lite else 'Disabled'}`"
+                    info = f"Lite Context `{'Enabled' if config.light else 'Disabled'}`"
                     display_info(console, info, title="configuration")
                 elif user_request == ".find":
                     query = await DIALOGS.getInputDialog(title="Search Chat Files", text="Enter a search query:")
@@ -874,7 +890,7 @@ Press `Ctrl+C` once or twice until the loading is cancelled, while you are waiti
             specified_tool = ""
 
             # Tool selection systemm message
-            system_tool_selection = get_system_tool_selection(available_tools, tool_descriptions)
+            system_tool_selection = get_system_tool_selection(available_tools, tool_descriptions_lite if config.light else tool_descriptions)
 
             # auto tool selection in chat mode
             if config.agent_mode is None and config.auto_tool_selection and not user_request.startswith("@"):
@@ -1008,16 +1024,19 @@ Press `Ctrl+C` once or twice until the loading is cancelled, while you are waiti
                         continue
                     else:
                         user_request = improved_prompt_edit
+                
+                # update original request
+                original_request = user_request
 
             # Add user request to messages
             if not user_request == "[CONTINUE]":
                 messages.append({"role": "user", "content": user_request})
 
             async def run_tool(tool, tool_instruction):
-                nonlocal messages
+                nonlocal messages, original_request
                 tool_instruction = fix_string(tool_instruction)
                 messages[-1]["content"] = fix_string(messages[-1]["content"])
-                request_dict = [{"role": "system", "content": DEFAULT_SYSTEM}]+messages[len(messages)-2:] if config.lite else deepcopy(messages)
+                request_dict = get_lite_messages(messages, original_request) if config.light else deepcopy(messages)
                 if tool == "get_direct_text_response":
                     messages = agentmake(messages, system="auto", **AGENTMAKE_CONFIG)
                 else:
@@ -1066,7 +1085,7 @@ Press `Ctrl+C` once or twice until the loading is cancelled, while you are waiti
                         messages.append({"role": "assistant", "content": tool_result if tool_result.strip() else "Tool error!"})
                     except Exception as e:
                         if DEVELOPER_MODE:
-                            console.print(f"Error: {e}\nFallback to direct response...\n\n")
+                            console.print(f"Error: {e}\nFallback to direct response ...\n\n")
                             print(traceback.format_exc())
                         messages = agentmake(messages, system="auto", **AGENTMAKE_CONFIG)
                 messages[-1]["content"] = fix_string(messages[-1]["content"])
@@ -1150,7 +1169,7 @@ Press `Ctrl+C` once or twice until the loading is cancelled, while you are waiti
 
 Available tools are: {available_tools}.
 
-{tool_descriptions}
+{tool_descriptions_lite if config.light else tool_descriptions}
 
 # My Request
 
@@ -1193,6 +1212,7 @@ Available tools are: {available_tools}.
             system_make_suggestion = get_system_make_suggestion(master_plan=master_plan)
 
             # Get the first suggestion
+            config.cancelled = False
             conversation_broken = False
             if user_request == "[CONTINUE]":
                 next_suggestion = "CONTINUE"
@@ -1281,10 +1301,24 @@ Available tools are: {available_tools}.
                     else:
                         next_tool_description = tools.get(next_tool, "No description available.")
                         system_tool_instruction = get_system_tool_instruction(next_tool, next_tool_description)
-                        next_step_output = agentmake(next_suggestion, system=system_tool_instruction, **AGENTMAKE_CONFIG)
-                        next_step = next_step_output[-1].get("content", "").strip()
+                        #next_step_output = agentmake(next_suggestion, system=system_tool_instruction, **AGENTMAKE_CONFIG)
+                        #next_step = next_step_output[-1].get("content", "").strip()
                         # The following line may give better context, but when a conversation goes long, the agent loses track of the system message.
                         #next_step = agentmake([{"role": "system", "content": system_tool_instruction}]+messages[len(DEFAULT_MESSAGES):], follow_up_prompt=next_suggestion, **AGENTMAKE_CONFIG)[-1].get("content", "").strip()
+                        lite_messages = get_lite_messages(messages, original_request)
+                        next_suggestion += f"""
+
+# Remember:
+* Do NOT provide the answer or perform the task. Provide the instruction ONLY, which the AI assistant will follow or answer.
+* You are here to proved the instruction for the current step ONLY.
+* Do not mention the tool name in your instruction.
+* Do not mention further steps or tools to be used after this instruction.
+* Only provide the instruction for the specified tool `{next_tool}`.
+* Pay attention to the information the tool requires and provide the necessary details in your instruction.
+
+You provide the converted instruction directly, without any additional commentary or explanation."""
+                        next_step_output = agentmake(lite_messages, system=system_tool_instruction, follow_up_prompt=next_suggestion, **AGENTMAKE_CONFIG)
+                        next_step = next_step_output[-1].get("content", "").strip()
                 try:
                     await thinking(get_next_step, "Crafting the next instruction ...")
                     if not next_step_output:
@@ -1318,6 +1352,11 @@ Available tools are: {available_tools}.
                     await process_tool(next_tool, next_step, step_number=step)
                 except (KeyboardInterrupt, asyncio.CancelledError):
                     display_cancel_message(console)
+                    conversation_broken = True
+                    break
+                if messages[-1]['content'] == "[NO_CONTENT]":
+                    messages = messages[:-2]  # remove last user and assistant messages
+                    display_cancel_message(console, cancel_message="No content was generated. Stopping the process.")
                     conversation_broken = True
                     break
                 console.rule()

@@ -35,7 +35,7 @@ Args [required]:
 
 @mcp.tool
 def search_weather(request:str) -> str:
-    f"""Answer a query about weather; a weather-related query is required.
+    """Answer a query about weather; a weather-related query is required.
 
 Args [required]:
     code: Generate python code that use my OpenWeatherMap API key '{OPENWEATHERMAP_API_KEY[0]}' to answer my query about weather. Use Celsius as the unit for temperature.

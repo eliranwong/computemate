@@ -227,7 +227,7 @@ Select / deselect to enable / disable tools.
 | `.autoprompt`        | Toggle auto prompt engineering     |
 | `.autotool`          | Toggle auto tool selection         |
 | `.autocorrect`       | Toggle auto code correction        |
-| `.lite`              | Toggle lite context                |
+| `.light`             | Toggle light context               |
 | `.steps`             | Set max number of steps            |
 | `.matches`           | Set max number of semantic matches |
 | `.download`          | Download data files                |
@@ -235,12 +235,15 @@ Select / deselect to enable / disable tools.
 
 ### Remarks:
 
-* Use `.lite` to enable or disable lite context. When lite context is enabled, ComputeMate runs faster, with a slight trade‑off in tool response quality.
+* Use `.light` to enable or disable *light context*. When *light context* is enabled (default), BibleMate operates slightly faster, with a minor trade-off in tool response quality. When *light context* is disabled, full context is used, which consumes more tokens for processing but delivers higher response quality.
 * To use `.import`, you need to specify a python file that contains a saved conversation.  Conversation is saved into a file each time when a backup is executed. Check the message `Conversation backup saved to ...` or locate the backups in `~/agentmake/xomate`. Instead of loading a mere conversation, you can load both a conversation and its master plan. To do so, specify a backup directory path that contains both `conversation.py` and `master_plan.md`.
 * `.edit` command allows you to edit the current conversation with our built-in text editor.  You may customize to use your favorite text editor. Enter `.backend` and change the value of `DEFAULT_TEXT_EDITOR` with a command that calls your favorite text editor.
 * Use `.autosuggest` to toggle auto input suggestions. If disabled, you can use `TAB` key to open input suggestions menu.
 * Use `.reload` to reload the last saved conversation, if any.  It is useful for continuing an unfinished agentic flow after a conversation was broken for any reasons.
 * Command `.matches` works for local MCP connection only.  It doesn't apply to remote MCP connection, as the changes in local settings does not affect the settings in remote servers.
+* Start your requests with `.`, to apply the tool `execute_task` directly, when the content following the . does not match the action commands listed above. For examples:
+
+> .What is the current time?
 
 ### Additional Special Entries
 

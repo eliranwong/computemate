@@ -20,35 +20,19 @@ Setup example:
 
 Go to https://aistudio.google.com/, log in with a Google account, and create an API key for Free.
 
-2. Download Perplexica, run in terminal:
+2. Set up Perplexica and SearXNG, run in terminal:
 
-> git clone https://github.com/ItzCrazyKns/Perplexica.git
+```
+sudo apt install -y git
+git clone https://github.com/ItzCrazyKns/Perplexica.git
+cd Perplexica
+docker build -t perplexica .
+docker run -d --restart unless-stopped -p 3000:3000 -p 4000:8080 -v perplexica-data:/home/perplexica/data -v perplexica-uploads:/home/perplexica/uploads --name perplexica perplexica
+```
 
-3. Navigate to the Perplexica directory:
+3. Testing
 
-> cd Perplexica
-
-4. Copy the configuration sample:
-
-> cp sample.config.toml config.toml
-
-5. Edit the configuration file with a text editor, e.g. micro:
-
-> micro config.toml
-
-Fill in your Gemini API key, save it and close the text editor.
-
-<img width="1732" height="1258" alt="Image" src="https://github.com/user-attachments/assets/3944edc8-d4a4-4496-a76b-a334c37e4e02" />
-
-6. Build the Perplexica and Searxng Servers, run in terminal:
-
-> docker compose up -d
-
-<img width="1732" height="1258" alt="Image" src="https://github.com/user-attachments/assets/49a8b986-7b7b-4c88-ac70-a5c69291f37b" />
-
-7. Testing
-
-To test Perplexica web ui, open "http://localhost:3000"
+To set up providers Perplexica web ui, open "http://localhost:3000"
 
 <img width="2560" height="1536" alt="Image" src="https://github.com/user-attachments/assets/e3c10536-ec05-42d2-9ee8-0591023a154d" />
 

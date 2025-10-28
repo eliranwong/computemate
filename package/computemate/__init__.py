@@ -16,7 +16,7 @@ default_config = '''banner_title=""
 *auto_tool_selection=True
 *auto_code_correction=True
 *max_steps=50
-*lite=False
+*light=False
 *web_browser=False
 *hide_tools_order=True
 *skip_connection_check=False
@@ -52,7 +52,7 @@ auto_suggestions={config.auto_suggestions}
 auto_tool_selection={config.auto_tool_selection}
 auto_code_correction={config.auto_code_correction}
 max_steps={config.max_steps}
-lite={config.lite}
+light={config.light}
 web_browser={config.web_browser}
 hide_tools_order={config.hide_tools_order}
 skip_connection_check={config.skip_connection_check}
@@ -114,7 +114,7 @@ config.action_list = {
     ".autoprompt": "toggle auto prompt engineering",
     ".autotool": "toggle auto tool selection in chat mode",
     ".autocorrect": "toggle auto code correction",
-    ".lite": "toggle lite context",
+    ".light": "toggle light context",
     # file access
     ".content": "show current directory content",
     ".directory": "change directory",

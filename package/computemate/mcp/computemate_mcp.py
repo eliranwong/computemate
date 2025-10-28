@@ -36,7 +36,7 @@ def getResponse(messages:list) -> str:
 
 @mcp.tool
 def answer_time_query(request:str) -> str:
-    f"""Answer a query about time; a time-related query is required.
+    """Answer a query about time; a time-related query is required.
 
 Args [required]:
     code: Generate Python code that integrates libraries `pendulum` or `pytz` to answer my query about time.

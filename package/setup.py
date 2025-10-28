@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools.command.install import install
 import os, shutil, platform, sys
 
-version = "0.2.35"
+version = "0.2.39"
 with open(os.path.join("computemate", "version.txt"), "w", encoding="utf-8") as fileObj:
     fileObj.write(version)
 
