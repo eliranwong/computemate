@@ -1,7 +1,7 @@
 from computemate.core.systems import *
 from computemate.ui.text_area import getTextArea
 from computemate.ui.info import get_banner
-from computemate import config, DIALOGS, COMPUTEMATE_VERSION, AGENTMAKE_CONFIG, COMPUTEMATE_PACKAGE_PATH, COMPUTEMATE_USER_DIR, COMPUTEMATEDATA, fix_string, write_user_config, edit_mcp_config_file, get_mcp_config_file, run_system_command, list_dir_content
+from computemate import config, CONFIG_FILE_BACKUP, DIALOGS, COMPUTEMATE_VERSION, AGENTMAKE_CONFIG, COMPUTEMATE_PACKAGE_PATH, COMPUTEMATE_USER_DIR, COMPUTEMATEDATA, fix_string, write_user_config, edit_mcp_config_file, get_mcp_config_file, run_system_command, list_dir_content
 from pathlib import Path
 import urllib.parse
 import asyncio, re, os, subprocess, click, gdown, pprint, argparse, json, zipfile, warnings, sys, traceback
@@ -39,10 +39,6 @@ parser.add_argument("-m", "--mode", action="store", dest="mode", choices=["agent
 parser.add_argument("-pe", "--promptengineer", action="store", dest="promptengineer", choices=["true", "false"], help="Enable / disable prompt engineering. Must be one of: true, false.")
 parser.add_argument("-s", "--steps", action="store", dest="steps", type=int, help="Specify the maximum number of steps allowed.")
 parser.add_argument("-e", "--exit", action="store_true", dest="exit", help="exit after the first response (for single-turn use cases).")
-# mcp options
-#parser.add_argument("-t", "--token", action="store", dest="token", help="specify a static token to use for authentication with the MCP server; applicable to command `computemate` only")
-#parser.add_argument("-mcp", "--mcp", action="store", dest="mcp", help=f"specify a custom MCP server to use, e.g. 'http://127.0.0.1:{config.mcp_port}/mcp/'; applicable to command `computemate` only")
-#parser.add_argument("-p", "--port", action="store", dest="port", help=f"specify a port for the MCP server to use, e.g. {config.mcp_port}; applicable to command `computematemcp` only")
 args = parser.parse_args()
 
 if not sys.stdin.isatty():
@@ -53,14 +49,9 @@ if not sys.stdin.isatty():
         args.default = [stdin_text]
 
 # write to the `config.py` file temporarily for the MCP server to pick it up
-if args.backend:
-    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.py"), "a", encoding="utf-8") as fileObj:
-        fileObj.write(f'''\nbackend="{args.backend}"''')
-    config.backend = args.backend
-else:
-    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.py"), "a", encoding="utf-8") as fileObj:
-        fileObj.write(f'''\nbackend="{DEFAULT_AI_BACKEND}"''')
-    config.backend = DEFAULT_AI_BACKEND
+config.backend = args.backend if args.backend else os.getenv("DEFAULT_AI_BACKEND") if os.getenv("DEFAULT_AI_BACKEND") else "ollama"
+with open(CONFIG_FILE_BACKUP, "a", encoding="utf-8") as fileObj:
+    fileObj.write(f'''\nconfig.backend="{config.backend}"''')
 
 AGENTMAKE_CONFIG["backend"] = config.backend
 DEFAULT_SYSTEM = "You are ComputeMate AI, an autonomous agent designed to assist users with using computers."
@@ -345,7 +336,7 @@ async def main_async():
                     # check connection
                     if not config.skip_connection_check:
                         try:
-                            agentmake("Hello!", system=DEFAULT_SYSTEM)
+                            agentmake("Hello!", backend=config.backend, system=DEFAULT_SYSTEM)
                         except Exception as e:
                             print("Connection failed! Please ensure that you have a stable internet connection and that my AI backend and model are properly configured.")
                             print("Viist https://github.com/eliranwong/agentmake#supported-backends for help about the backend configuration.\n")
@@ -1043,7 +1034,17 @@ Press `Ctrl+C` once or twice until the running process is cancelled, while you a
                     try:
                         tool_schema = tools_schema[tool]
                         tool_properties = tool_schema["parameters"]["properties"]
-                        if tool in ["computemate_execute_task", "execute_task", "computemate_answer_time_query", "answer_time_query", "online_search_weather", "search_weather"]+config.device_info_tools:
+                        if tool in [
+                            "computemate_execute_task", "execute_task", 
+                            "computemate_answer_time_query", "answer_time_query",
+                            "computemate_calendar_outlook", "calendar_outlook",
+                            "computemate_calendar_google", "calendar_google",
+                            "computemate_memory_in", "memory_in",
+                            "computemate_memory_out", "memory_out",
+                            "online_search_weather", "search_weather",
+                            "online_search_web", "search_web",
+                            "online_search_news", "search_news",
+                        ]+config.device_info_tools:
                             tool_instruction = "# Instruction\n\n"+tool_instruction+"\n\n# Supplementary Device Information\n\n"+getDeviceInfo()
                         if tool in ("computemate_execute_task", "execute_task"):
                             tool_result = agentmake(tool_instruction, **{'tool': 'magic' if config.auto_code_correction else 'execute_task'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
@@ -1055,7 +1056,7 @@ Press `Ctrl+C` once or twice until the running process is cancelled, while you a
                         elif tool in ("computemate_email_outlook", "email_outlook", "computemate_email_gmail", "email_gmail"):
                             tool_result = agentmake(tool_instruction, **{'tool': 'email/outlook' if 'outlook' in tool else 'email/gmail'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         elif tool in ("computemate_calendar_outlook", "calendar_outlook", "computemate_calendar_google", "calendar_google"):
-                            tool_result = agentmake(tool_instruction, **{'input_content_plugin': 'convert_relative_datetime', 'tool': 'calendar/outlook' if 'outlook' in tool else 'calendar/google'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
+                            tool_result = agentmake(tool_instruction, **{'tool': 'calendar/outlook' if 'outlook' in tool else 'calendar/google'}, **AGENTMAKE_CONFIG)[-1].get("content") if messages and "content" in messages[-1] else "Error!"
                         elif tool in ("computemate_teamwork", "teamwork"):
                             #this_AGENTMAKE_CONFIG = deepcopy(AGENTMAKE_CONFIG)
                             #this_AGENTMAKE_CONFIG["print_on_terminal"] = True
@@ -1420,7 +1421,7 @@ You provide the converted instruction directly, without any additional commentar
                 config.backup_required = False
     
     # back up configurations
-    write_user_config(backup=True)
+    #write_user_config()
     # reset terminal window title
     clear_title()
 

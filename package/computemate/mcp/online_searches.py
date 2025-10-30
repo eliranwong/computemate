@@ -41,7 +41,7 @@ Args [required]:
     code: Generate python code that use my OpenWeatherMap API key '{OPENWEATHERMAP_API_KEY[0]}' to answer my query about weather. Use Celsius as the unit for temperature.
 """
     global agentmake, getResponse
-    messages = agentmake(request, **{'input_content_plugin': 'convert_relative_datetime', 'tool': 'qna/weather'}, **AGENTMAKE_CONFIG)
+    messages = agentmake(request, **{'tool': 'qna/weather'}, **AGENTMAKE_CONFIG)
     return getResponse(messages)
 
 @mcp.tool

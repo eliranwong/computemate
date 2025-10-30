@@ -1,83 +1,85 @@
 from agentmake import USER_OS, AGENTMAKE_USER_DIR, DEFAULT_TEXT_EDITOR, readTextFile, writeTextFile
 from pathlib import Path
+from computemate import config
 from computemate.ui.selection_dialog import TerminalModeDialogs
 import os, shutil, pprint, subprocess
 
-CONFIG_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.py")
-CONFIG_FILE_BACKUP = os.path.join(AGENTMAKE_USER_DIR, "computemate", "config.py")
+COMPUTEMATE_USER_DIR = os.path.join(AGENTMAKE_USER_DIR, "computemate")
+if not os.path.isdir(COMPUTEMATE_USER_DIR):
+    Path(COMPUTEMATE_USER_DIR).mkdir(parents=True, exist_ok=True)
+CONFIG_FILE_BACKUP = os.path.join(COMPUTEMATE_USER_DIR, "computemate.config")
 
 # NOTE: When add a config item, update both `default_config` and `write_user_config`
 
-# restore config backup after upgrade
-default_config = '''banner_title=""
-*agent_mode=None
-*prompt_engineering=False
-*auto_suggestions=True
-*auto_tool_selection=True
-*auto_code_correction=True
-*max_steps=50
-*light=False
-*web_browser=False
-*hide_tools_order=True
-*skip_connection_check=False
-*max_semantic_matches=15
-*max_log_lines=2000
-*mcp_port=33333
-*mcp_timeout=9999999999
-*color_agent_mode="#FF8800"
-*color_partner_mode="#8000AA"
-*color_info_border="bright_blue"
-*embedding_model="paraphrase-multilingual"
-*custom_input_suggestions=[]
-*device_info_tools=[]
-*disabled_tools=[]'''
-
-if readTextFile(CONFIG_FILE).strip() == "":
-    just_upgraded = True
-    if os.path.isfile(CONFIG_FILE_BACKUP):
-        shutil.copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
-    else:
-        writeTextFile(CONFIG_FILE, default_config.replace("\n*", "\n"))
-else:
-    just_upgraded = False
-
-from computemate import config
-
 def write_user_config(backup=False):
     """Writes the current configuration to the user's config file."""
-    configurations = f"""banner_title="{config.banner_title}"
-agent_mode={config.agent_mode}
-prompt_engineering={config.prompt_engineering}
-auto_suggestions={config.auto_suggestions}
-auto_tool_selection={config.auto_tool_selection}
-auto_code_correction={config.auto_code_correction}
-max_steps={config.max_steps}
-light={config.light}
-web_browser={config.web_browser}
-hide_tools_order={config.hide_tools_order}
-skip_connection_check={config.skip_connection_check}
-max_semantic_matches={config.max_semantic_matches}
-max_log_lines={config.max_log_lines}
-mcp_port={config.mcp_port}
-mcp_timeout={config.mcp_timeout}
-color_agent_mode="{config.color_agent_mode}"
-color_partner_mode="{config.color_partner_mode}"
-color_info_border="{config.color_info_border}"
-embedding_model="{config.embedding_model}"
-custom_input_suggestions={pprint.pformat(config.custom_input_suggestions)}
-device_info_tools={pprint.pformat(config.device_info_tools)}
-disabled_tools={pprint.pformat(config.disabled_tools)}"""
-    writeTextFile(CONFIG_FILE_BACKUP if backup else CONFIG_FILE, configurations)
+    configurations = f"""config.banner_title="{config.banner_title}"
+config.agent_mode={config.agent_mode}
+config.prompt_engineering={config.prompt_engineering}
+config.auto_suggestions={config.auto_suggestions}
+config.auto_tool_selection={config.auto_tool_selection}
+config.auto_code_correction={config.auto_code_correction}
+config.max_steps={config.max_steps}
+config.light={config.light}
+config.web_browser={config.web_browser}
+config.hide_tools_order={config.hide_tools_order}
+config.skip_connection_check={config.skip_connection_check}
+config.max_semantic_matches={config.max_semantic_matches}
+config.max_log_lines={config.max_log_lines}
+config.mcp_port={config.mcp_port}
+config.mcp_timeout={config.mcp_timeout}
+config.color_agent_mode="{config.color_agent_mode}"
+config.color_partner_mode="{config.color_partner_mode}"
+config.color_info_border="{config.color_info_border}"
+config.embedding_model="{config.embedding_model}"
+config.custom_input_suggestions={pprint.pformat(config.custom_input_suggestions)}
+config.device_info_tools={pprint.pformat(config.device_info_tools)}
+config.disabled_tools={pprint.pformat(config.disabled_tools)}"""
+    writeTextFile(CONFIG_FILE_BACKUP, configurations)
 
-if just_upgraded:
+# restore config backup after upgrade
+default_config = '''config.banner_title=""
+config.agent_mode=None
+config.prompt_engineering=False
+config.auto_suggestions=True
+config.auto_tool_selection=True
+config.auto_code_correction=True
+config.max_steps=50
+config.light=False
+config.web_browser=False
+config.hide_tools_order=True
+config.skip_connection_check=False
+config.max_semantic_matches=15
+config.max_log_lines=2000
+config.mcp_port=33333
+config.mcp_timeout=9999999999
+config.color_agent_mode="#FF8800"
+config.color_partner_mode="#8000AA"
+config.color_info_border="bright_blue"
+config.embedding_model="paraphrase-multilingual"
+config.custom_input_suggestions=[]
+config.device_info_tools=[]
+config.disabled_tools=[]'''
+
+def load_config():
+    """Loads the user's configuration from the config file."""
+    if not os.path.isfile(CONFIG_FILE_BACKUP):
+        exec(default_config, globals())
+        write_user_config()
+    else:
+        exec(readTextFile(CONFIG_FILE_BACKUP), globals())
+    # check if new config items are added
     changed = False
-    for config_item in default_config.split("\n*"):
-        key, value = config_item.split("=", 1)
+    for config_item in default_config[7:].split("\nconfig."):
+        key, _ = config_item.split("=", 1)
         if not hasattr(config, key):
             exec(f"config.{config_item}", globals())
             changed = True
     if changed:
         write_user_config()
+
+# load user config at startup
+load_config()
 
 # temporary config
 config.current_prompt = ""
@@ -141,7 +143,6 @@ AGENTMAKE_CONFIG = {
 }
 COMPUTEMATE_VERSION = readTextFile(os.path.join(os.path.dirname(os.path.realpath(__file__)), "version.txt"))
 COMPUTEMATE_PACKAGE_PATH = os.path.dirname(os.path.realpath(__file__))
-COMPUTEMATE_USER_DIR = os.path.join(AGENTMAKE_USER_DIR, "computemate")
 COMPUTEMATEDATA = os.path.join(AGENTMAKE_USER_DIR, "computemate", "data")
 if not os.path.isdir(COMPUTEMATEDATA):
     Path(COMPUTEMATEDATA).mkdir(parents=True, exist_ok=True)

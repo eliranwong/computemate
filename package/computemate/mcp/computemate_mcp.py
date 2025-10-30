@@ -42,7 +42,7 @@ Args [required]:
     code: Generate Python code that integrates libraries `pendulum` or `pytz` to answer my query about time.
 """
     global agentmake, getResponse
-    messages = agentmake(request, **{'input_content_plugin': 'convert_relative_datetime', 'tool': 'qna/time'}, **AGENTMAKE_CONFIG)
+    messages = agentmake(request, **{'tool': 'qna/time'}, **AGENTMAKE_CONFIG)
     return getResponse(messages)
 
 def export_text_to_docx_file(docx_file_path:str, text_content:str) -> str:
@@ -135,7 +135,7 @@ Args [required]:
     category: Select a category that is the most relevant to this memory: ['general', 'instruction', 'fact', 'event', 'concept']
 """
     global agentmake, getResponse
-    messages = agentmake(request, **{'input_content_plugin': 'convert_relative_datetime', 'tool': 'memory/in'}, **AGENTMAKE_CONFIG)
+    messages = agentmake(request, **{'tool': 'memory/in'}, **AGENTMAKE_CONFIG)
     return getResponse(messages)
 
 @mcp.tool
@@ -146,7 +146,7 @@ Args [required]:
     query: The query to be used for searching memories from a vector database. I would like you to help me with converting relative dates and times, if any, into exact dates and times, based on the reference that the current datetime is 2025-10-15 19:05:25 (Wednesday).
 """
     global agentmake, getResponse
-    messages = agentmake(request, **{'input_content_plugin': 'convert_relative_datetime', 'tool': 'memory/out'}, **AGENTMAKE_CONFIG)
+    messages = agentmake(request, **{'tool': 'memory/out'}, **AGENTMAKE_CONFIG)
     return getResponse(messages)
 
 # files
