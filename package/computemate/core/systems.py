@@ -43,3 +43,12 @@ def get_system_tool_selection(available_tools: list, tool_descriptions: str) -> 
     possible_system_file_path_2 = os.path.join(PACKAGE_PATH, "systems", "computemate", "tool_selection_lite.md" if config.light else "tool_selection.md")
     possible_system_file_path_1 = os.path.join(AGENTMAKE_USER_DIR, "systems", "computemate", "tool_selection_lite.md" if config.light else "tool_selection.md")
     return readTextFile(possible_system_file_path_2 if os.path.isfile(possible_system_file_path_2) else possible_system_file_path_1).format(available_tools=available_tools, tool_descriptions=tool_descriptions)
+
+def get_system_generate_title() -> str:
+    """
+    create system prompt for title generation
+    """
+    possible_system_file_path_2 = os.path.join(PACKAGE_PATH, "systems", "generate_title.md")
+    possible_system_file_path_1 = os.path.join(AGENTMAKE_USER_DIR, "systems", "generate_title.md")
+    system_prompt = readTextFile(possible_system_file_path_2 if os.path.isfile(possible_system_file_path_2) else possible_system_file_path_1)
+    return system_prompt
