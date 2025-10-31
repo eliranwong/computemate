@@ -33,7 +33,6 @@ config.color_partner_mode="{config.color_partner_mode}"
 config.color_info_border="{config.color_info_border}"
 config.embedding_model="{config.embedding_model}"
 config.custom_input_suggestions={pprint.pformat(config.custom_input_suggestions)}
-config.device_info_tools={pprint.pformat(config.device_info_tools)}
 config.disabled_tools={pprint.pformat(config.disabled_tools)}"""
     writeTextFile(CONFIG_FILE_BACKUP, configurations)
 
@@ -58,7 +57,6 @@ config.color_partner_mode="#8000AA"
 config.color_info_border="bright_blue"
 config.embedding_model="paraphrase-multilingual"
 config.custom_input_suggestions=[]
-config.device_info_tools=[]
 config.disabled_tools=[]'''
 
 def load_config():
