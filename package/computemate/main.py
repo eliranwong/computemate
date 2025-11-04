@@ -1021,7 +1021,7 @@ Press `Ctrl+C` once or twice until the running process is cancelled, while you a
 
             # Prompt Engineering
             original_request = user_request
-            if not specified_tool == "@@" and config.prompt_engineering and not user_request in ("[STOP]", "[CONTINUE]"):
+            if ((not specified_tool) or (specified_tool == "get_direct_text_response")) and config.prompt_engineering and not user_request in ("[STOP]", "[CONTINUE]"):
                 improved_prompt_output = ""
                 async def run_prompt_engineering():
                     nonlocal user_request, improved_prompt_output
@@ -1114,7 +1114,8 @@ Press `Ctrl+C` once or twice until the running process is cancelled, while you a
                             console.print(f"Error: {e}\nFallback to direct response ...\n\n")
                             print(traceback.format_exc())
                         messages = agentmake(messages, system="auto", **AGENTMAKE_CONFIG)
-                messages[-1]["content"] = fix_string(messages[-1]["content"])
+                if messages:
+                    messages[-1]["content"] = fix_string(messages[-1]["content"])
 
             # execute a single tool
             if specified_tool and not specified_tool == "@@" and not specified_prompt:
@@ -1125,7 +1126,7 @@ Press `Ctrl+C` once or twice until the running process is cancelled, while you a
                     async def refine_tool_instruction():
                         nonlocal refined_instruction_output, refined_instruction, tools, messages, original_request, specified_tool
                         specified_tool_description = tools.get(specified_tool, "No description available.")
-                        instruction_draft = TOOL_INSTRUCTION_PROMPT + "\n\n# Suggestions\n\n"+messages[-1]['content']+f"\n\n# Tool Description of `{specified_tool}`\n\n"+specified_tool_description+"\n\n# Supplementary Device Information\n\n"+getDeviceInfo()+TOOL_INSTRUCTION_SUFFIX
+                        instruction_draft = TOOL_INSTRUCTION_PROMPT + "\n\n# Suggestions\n\n"+messages[-1]['content']+f"\n\n# Tool Description of `{specified_tool}`\n\n"+specified_tool_description+TOOL_INSTRUCTION_SUFFIX
                         system_tool_instruction = get_system_tool_instruction(specified_tool, specified_tool_description)
                         if config.light:
                             this_messages = get_lite_messages(messages, original_request)
@@ -1137,22 +1138,22 @@ Press `Ctrl+C` once or twice until the running process is cancelled, while you a
                         await thinking(refine_tool_instruction, "Refining tool instruction ...")
                         if not refined_instruction_output:
                             display_cancel_message(console)
-                            if step == 1:
-                                config.current_prompt = original_request
-                            conversation_broken = True
-                            break
-                        else:
-                            messages[-1]['content'] = refined_instruction
+                            config.current_prompt = original_request
+                            continue
                     except (KeyboardInterrupt, asyncio.CancelledError):
                         display_cancel_message(console)
-                        if step == 1:
-                            config.current_prompt = original_request
-                        conversation_broken = True
-                        break
+                        config.current_prompt = original_request
+                        continue
+                    # review in partner or chat mode
+                    if not config.agent_mode:
+                        display_info(console, "Please review and confirm the refined instruction, or make any changes you need.", title="Review & Confirm")
+                        refined_instruction = await getTextArea(default_entry=refined_instruction, title="Review - Refined Instruction")
+                        if not refined_instruction or refined_instruction == ".exit":
+                            display_cancel_message(console)
+                            continue
+                    messages[-1]['content'] = refined_instruction
                     # display refined instruction
-                    display_info(console, Markdown(messages[-1]['content']), title="Refined Instruction", border_style=get_border_style())
-                elif config.prompt_engineering:
-                    display_info(console, Markdown(messages[-1]['content']), title="Refined Instruction", border_style=get_border_style())
+                    display_info(console, Markdown(refined_instruction), title="Refined Instruction", border_style=get_border_style())
                 try:
                     await process_tool(specified_tool, user_request)
                 except (KeyboardInterrupt, asyncio.CancelledError):
@@ -1169,7 +1170,6 @@ Press `Ctrl+C` once or twice until the running process is cancelled, while you a
             # Chat mode
             messages_output = []
             if config.agent_mode is None and not specified_tool == "@@" and not specified_prompt:
-                display_info(console, Markdown(messages[-1]['content']), border_style="none")
                 async def run_chat_mode():
                     nonlocal messages_output, messages, user_request
                     messages_output = agentmake(messages if messages else user_request, system="auto", **AGENTMAKE_CONFIG)
@@ -1189,8 +1189,8 @@ Press `Ctrl+C` once or twice until the running process is cancelled, while you a
                     if messages and messages[-1].get("role", "") == "user":
                         messages = messages[:-1] # remove the last user message
                     continue
-                print()
                 console.print(Markdown(messages[-1]['content']))
+                print()
                 # temporaily save after each step
                 backup_conversation(messages, "")
                 config.backup_required = True
@@ -1383,7 +1383,7 @@ Available tools are: {available_tools}.
                     conversation_broken = True
                     break
                 # partner mode
-                if config.agent_mode == False:
+                if not config.agent_mode:
                     display_info(console, "Please review and confirm the next instruction, or make any changes you need.", title="Review & Confirm")
                     next_step_edit = await getTextArea(default_entry=next_step, title="Review - Next Instruction")
                     if not next_step_edit or next_step_edit == ".exit":
