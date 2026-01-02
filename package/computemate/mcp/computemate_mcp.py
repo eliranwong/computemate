@@ -8,6 +8,7 @@ from computemate import COMPUTEMATE_VERSION, AGENTMAKE_CONFIG, config, list_dir_
 
 # configure backend
 AGENTMAKE_CONFIG["backend"] = config.backend
+AGENTMAKE_CONFIG["model"] = config.model
 
 # Configure logging before creating the FastMCP server
 logging.basicConfig(format="[%(levelname)s]: %(message)s", level=logging.ERROR)
